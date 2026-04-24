@@ -1,0 +1,37 @@
+{
+  "@@locale": "ar",
+  "appTitle": "UniGuide",
+  "welcome": "مرحبًا بك في UniGuide",
+  "chooseLanguage": "اختر لغتك",
+  "back": "العودة",
+  "getStarted": "ابدأ",
+  "next": "التالي",
+  "videoUrl": "dQw4w9WgXcQ",
+
+  "tasks": "مهامك",
+  "services": "الخدمات",
+  "nextStep": "ابدأ بالتسجيل في الجامعة",
+  "housing": "السكن",
+  "residence": "الإقامة",
+  "university": "الجامعة",
+  "transport": "المواصلات",
+  "kimlik_randevu": "حجز موعد الإقامة",
+  "hesap_acma": "فتح حساب بنكي",
+  "ogr_kart": "استخراج كرت الطالب",
+
+  "home": "الرئيسية",
+  "guides": "الأدلة",
+  "profile": "الملف الشخصي",
+
+  "selectProvince": "اختر الولاية",
+  "provinceKutahya": "كوتاهيا",
+  "provinceIstanbul": "إسطنبول",
+  "provinceAnkara": "أنقرة",
+  "provinceIzmir": "إزمير",
+  "provinceEskisehir": "إسكي شهير",
+  "provinceBursa": "بورصة",
+  "provinceKonya": "قونية",
+  "provinceAntalya": "أنطاليا",
+  "provinceTrabzon": "طرابزون",
+  "provinceGaziantep": "غازي عنتاب"
+}

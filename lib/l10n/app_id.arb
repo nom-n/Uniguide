@@ -1,0 +1,40 @@
+{
+  "@@locale": "id",
+  "appTitle": "UniGuide",
+  "welcome": "Selamat datang di UniGuide",
+  "chooseLanguage": "Pilih bahasa Anda",
+  "back": "Kembali",
+  "getStarted": "Mulai",
+  "next": "Selanjutnya",
+  "@videoUrl": {
+    "description": "معرّف فيديو يوتيوب لمقدمة التطبيق عند اختيار اللغة الإندونيسية — ضع هنا معرّف الفيديو الخاص بالنسخة الإندونيسية فقط."
+  },
+  "videoUrl": "dQw4w9WgXcQ",
+
+  "tasks": "Tugas",
+  "services": "Layanan",
+  "nextStep": "Mulai pendaftaran universitas",
+  "housing": "Perumahan",
+  "residence": "Kediaman",
+  "university": "Universitas",
+  "transport": "Transportasi",
+  "kimlik_randevu": "Pemesanan janji temu kediaman",
+  "hesap_acma": "Membuka rekening bank",
+  "ogr_kart": "Penerbitan kartu mahasiswa",
+
+  "home": "Beranda",
+  "guides": "Panduan",
+  "profile": "Profil",
+
+  "selectProvince": "Pilih provinsi Anda",
+  "provinceKutahya": "Kütahya",
+  "provinceIstanbul": "Istanbul",
+  "provinceAnkara": "Ankara",
+  "provinceIzmir": "İzmir",
+  "provinceEskisehir": "Eskişehir",
+  "provinceBursa": "Bursa",
+  "provinceKonya": "Konya",
+  "provinceAntalya": "Antalya",
+  "provinceTrabzon": "Trabzon",
+  "provinceGaziantep": "Gaziantep"
+}

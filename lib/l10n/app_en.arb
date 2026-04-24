@@ -1,0 +1,37 @@
+{
+  "@@locale": "en",
+  "appTitle": "UniGuide",
+  "welcome": "Welcome to UniGuide",
+  "chooseLanguage": "Choose your language",
+  "back": "Back",
+  "getStarted": "Get Started",
+  "next": "Next",
+  "videoUrl": "dQw4w9WgXcQ",
+
+  "tasks": "Tasks",
+  "services": "Services",
+  "nextStep": "Start university registration",
+  "housing": "Housing",
+  "residence": "Residence",
+  "university": "University",
+  "transport": "Transport",
+  "kimlik_randevu": "Residence appointment booking",
+  "hesap_acma": "Opening a bank account",
+  "ogr_kart": "Student card issuance",
+
+  "home": "Home",
+  "guides": "Guides",
+  "profile": "Profile",
+
+  "selectProvince": "Select your province",
+  "provinceKutahya": "Kütahya",
+  "provinceIstanbul": "Istanbul",
+  "provinceAnkara": "Ankara",
+  "provinceIzmir": "İzmir",
+  "provinceEskisehir": "Eskişehir",
+  "provinceBursa": "Bursa",
+  "provinceKonya": "Konya",
+  "provinceAntalya": "Antalya",
+  "provinceTrabzon": "Trabzon",
+  "provinceGaziantep": "Gaziantep"
+}
