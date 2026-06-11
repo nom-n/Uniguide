@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uniguide/core/constants/app_constants.dart';
 import 'package:uniguide/l10n/app_localizations.dart';
 import 'package:uniguide/main.dart';
 import 'intro_video_page.dart';
 import 'language_selection_page.dart';
-
-/// مفتاح التخزين لمعرّف الولاية (يجب توافقه مع [main.dart]).
-const String kPrefsProvinceKey = 'province';
 
 /// ترتيب ثابت لمعرّفات الولايات التركية المدعومة.
 const List<String> kProvinceIds = <String>[
@@ -58,7 +56,7 @@ class _ProvinceSelectionPageState extends State<ProvinceSelectionPage>
   Future<void> _syncLocaleFromPrefs() async {
     final prefs = await SharedPreferences.getInstance();
     if (!mounted) return;
-    final code = prefs.getString('lang');
+    final code = prefs.getString(AppConstants.kPrefsLangKey);
     if (code == null) return;
     UniGuideApp.setLocale(context, Locale(code));
   }
@@ -99,7 +97,7 @@ class _ProvinceSelectionPageState extends State<ProvinceSelectionPage>
   Future<void> _onNext() async {
     if (_selected == null) return;
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(kPrefsProvinceKey, _selected!);
+    await prefs.setString(AppConstants.kPrefsProvinceKey, _selected!);
     if (!mounted) return;
     Navigator.pushReplacement(
       context,

@@ -6,7 +6,12 @@
   "back": "العودة",
   "getStarted": "ابدأ",
   "next": "التالي",
-  "videoUrl": "dQw4w9WgXcQ",
+  "videoUrl": "https://www.youtube.com/watch?v=wv6B9Vl77p0",
+
+  "themeModeTitle": "Theme mode",
+  "themeModeSystem": "System",
+  "themeModeLight": "Light",
+  "themeModeDark": "Dark",
 
   "tasks": "مهامك",
   "services": "الخدمات",

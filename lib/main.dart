@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:uniguide/core/constants/app_constants.dart';
+import 'package:uniguide/core/notifications/push_notification_service.dart';
 import 'package:uniguide/l10n/app_localizations.dart';
 import 'package:uniguide/core/navigation/main_navigation.dart';
 import 'package:uniguide/features/welcome/province_selection_page.dart';
 import 'package:uniguide/features/welcome/welcome_animation_page.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  PushNotificationService.instance.initialize();
+
   runApp(const UniGuideApp());
 }
 
@@ -19,12 +24,44 @@ class UniGuideApp extends StatefulWidget {
     state?.setLocale(newLocale);
   }
 
+  static void setThemeMode(BuildContext context, ThemeMode mode) {
+    final state = context.findAncestorStateOfType<_UniGuideAppState>();
+    state?.setThemeMode(mode);
+  }
+
   @override
   State<UniGuideApp> createState() => _UniGuideAppState();
 }
 
 class _UniGuideAppState extends State<UniGuideApp> {
   Locale _locale = const Locale('en');
+  ThemeMode _themeMode = ThemeMode.system;
+
+  @override
+  void initState() {
+    super.initState();
+
+    PushNotificationService.instance.initialize();
+    _loadThemePreference();
+  }
+
+  Future<void> _loadThemePreference() async {
+    final prefs = await SharedPreferences.getInstance();
+    final themeCode = prefs.getString(AppConstants.kPrefsThemeModeKey);
+    if (!mounted) return;
+    setThemeMode(_parseThemeMode(themeCode));
+  }
+
+  static ThemeMode _parseThemeMode(String? code) {
+    switch (code) {
+      case 'light':
+        return ThemeMode.light;
+      case 'dark':
+        return ThemeMode.dark;
+      default:
+        return ThemeMode.system;
+    }
+  }
 
   void setLocale(Locale locale) {
     setState(() {
@@ -32,30 +69,50 @@ class _UniGuideAppState extends State<UniGuideApp> {
     });
   }
 
+  void setThemeMode(ThemeMode mode) {
+    setState(() {
+      _themeMode = mode;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       locale: _locale,
-
-      supportedLocales: const [
-        Locale('en'),
-        Locale('ar'),
-        Locale('tr'),
-        Locale('fr'),
-        Locale('id'),
-        Locale('ur'),
-        Locale('so'),
-        Locale('kk'),
-      ],
-
-      localizationsDelegates: const [
-        AppLocalizations.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-
-      debugShowCheckedModeBanner: false,
+      supportedLocales: AppLocalizations.supportedLocales,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      themeMode: _themeMode,
+      theme: ThemeData(
+        useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: AppConstants.primaryColor,
+          brightness: Brightness.light,
+        ),
+        progressIndicatorTheme: const ProgressIndicatorThemeData(
+          color: AppConstants.primaryColor,
+        ),
+        textButtonTheme: TextButtonThemeData(
+          style: TextButton.styleFrom(
+            foregroundColor: AppConstants.primaryColor,
+          ),
+        ),
+      ),
+      darkTheme: ThemeData(
+        useMaterial3: true,
+        brightness: Brightness.dark,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: AppConstants.primaryColor,
+          brightness: Brightness.dark,
+        ),
+        progressIndicatorTheme: const ProgressIndicatorThemeData(
+          color: AppConstants.primaryColor,
+        ),
+        textButtonTheme: TextButtonThemeData(
+          style: TextButton.styleFrom(
+            foregroundColor: AppConstants.primaryColor,
+          ),
+        ),
+      ),
       builder: (context, child) {
         final mq = MediaQuery.of(context);
         return MediaQuery(
@@ -89,7 +146,7 @@ class _SplashPageState extends State<SplashPage> {
 
   Future<void> _checkLanguage() async {
     final prefs = await SharedPreferences.getInstance();
-    String? langCode = prefs.getString('lang');
+    String? langCode = prefs.getString(AppConstants.kPrefsLangKey);
 
     await Future.delayed(const Duration(seconds: 1));
 
@@ -102,7 +159,7 @@ class _SplashPageState extends State<SplashPage> {
       );
     } else {
       UniGuideApp.setLocale(context, Locale(langCode));
-      final province = prefs.getString(kPrefsProvinceKey);
+      final province = prefs.getString(AppConstants.kPrefsProvinceKey);
       if (province == null) {
         Navigator.pushReplacement(
           context,
@@ -119,6 +176,36 @@ class _SplashPageState extends State<SplashPage> {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    return Scaffold(
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              AppConstants.backgroundColor,
+              AppConstants.secondaryBackgroundColor,
+            ],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: SafeArea(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Image.asset(
+                AppConstants.appLogoPath,
+                width: 140,
+                height: 140,
+                fit: BoxFit.contain,
+              ),
+              const SizedBox(height: 28),
+              const CircularProgressIndicator(color: AppConstants.primaryColor),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

@@ -30,6 +30,18 @@ class AppLocalizationsKk extends AppLocalizations {
   String get videoUrl => 'dQw4w9WgXcQ';
 
   @override
+  String get themeModeTitle => 'Theme mode';
+
+  @override
+  String get themeModeSystem => 'System';
+
+  @override
+  String get themeModeLight => 'Light';
+
+  @override
+  String get themeModeDark => 'Dark';
+
+  @override
   String get tasks => 'Міндеттер';
 
   @override

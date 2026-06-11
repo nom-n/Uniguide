@@ -6,7 +6,12 @@
   "back": "Back",
   "getStarted": "Get Started",
   "next": "Next",
-  "videoUrl": "dQw4w9WgXcQ",
+  "videoUrl": "https://youtu.be/UU73GwGwOUM?si=f9VZtttBwnkSmKOe",
+
+  "themeModeTitle": "Theme mode",
+  "themeModeSystem": "System",
+  "themeModeLight": "Light",
+  "themeModeDark": "Dark",
 
   "tasks": "Tasks",
   "services": "Services",

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:uniguide/features/guides/guides_page.dart';
 import 'package:uniguide/features/home/home_page.dart';
 import 'package:uniguide/features/profile/profile_page.dart';
+import 'package:uniguide/features/tasks/tasks_page.dart';
 import 'package:uniguide/l10n/app_localizations.dart';
 
 class MainNavigation extends StatefulWidget {
@@ -33,7 +35,7 @@ class _MainNavigationState extends State<MainNavigation> {
             currentIndex = index;
           });
         },
-        selectedItemColor: Colors.blue,
+        selectedItemColor: const Color(0xFF007AFF),
         unselectedItemColor: Colors.grey,
         items: [
           BottomNavigationBarItem(
@@ -55,24 +57,6 @@ class _MainNavigationState extends State<MainNavigation> {
         ],
       ),
     );
-  }
-}
-
-class TasksPage extends StatelessWidget {
-  const TasksPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(body: Center(child: Text("صفحة المهام")));
-  }
-}
-
-class GuidesPage extends StatelessWidget {
-  const GuidesPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(body: Center(child: Text("صفحة الدليل")));
   }
 }
 

@@ -2,6 +2,12 @@
   "@@locale": "kk",
   "appTitle": "UniGuide",
   "videoUrl": "dQw4w9WgXcQ",
+
+  "themeModeTitle": "Theme mode",
+  "themeModeSystem": "System",
+  "themeModeLight": "Light",
+  "themeModeDark": "Dark",
+
   "welcome": "UniGuide-ке қош келдіңіз",
   "chooseLanguage": "Тілді таңдаңыз",
   "back": "Арқа",

@@ -1,4 +1,4 @@
-package com.example.uniguide
+package com.uniguide.app
 
 import io.flutter.embedding.android.FlutterActivity
 

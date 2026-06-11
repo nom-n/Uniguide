@@ -2,6 +2,12 @@
   "@@locale": "ur",
   "appTitle": "UniGuide",
   "videoUrl": "dQw4w9WgXcQ",
+
+  "themeModeTitle": "Theme mode",
+  "themeModeSystem": "System",
+  "themeModeLight": "Light",
+  "themeModeDark": "Dark",
+
   "welcome": "UniGuide میں خوش آمدید",
   "chooseLanguage": "اپنی زبان منتخب کریں",
   "back": "واپس",

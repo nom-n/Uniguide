@@ -1,3 +1,4 @@
+import 'package:uniguide/core/constants/app_constants.dart';
 import 'package:flutter/material.dart';
 import 'language_selection_page.dart';
 
@@ -57,7 +58,10 @@ class _WelcomeAnimationPageState extends State<WelcomeAnimationPage>
         height: double.infinity,
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFFF5F7FA), Color(0xFFE8ECEF)],
+            colors: [
+              AppConstants.backgroundColor,
+              AppConstants.secondaryBackgroundColor,
+            ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -86,19 +90,31 @@ class _WelcomeAnimationPageState extends State<WelcomeAnimationPage>
                             opacity: _fadeAnimation,
                             child: Padding(
                               padding: const EdgeInsets.symmetric(horizontal: 16),
-                              child: FittedBox(
-                                fit: BoxFit.scaleDown,
-                                child: Text(
-                                  'Welcome to UniGuide',
-                                  textAlign: TextAlign.center,
-                                  maxLines: 2,
-                                  style: TextStyle(
-                                    color: const Color(0xFF007AFF),
-                                    fontSize: titleSize,
-                                    fontWeight: FontWeight.w700,
-                                    letterSpacing: 0.5,
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Image.asset(
+                                    AppConstants.appLogoPath,
+                                    width: 140,
+                                    height: 140,
+                                    fit: BoxFit.contain,
                                   ),
-                                ),
+                                  const SizedBox(height: 16),
+                                  FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    child: Text(
+                                      'Welcome to UniGuide',
+                                      textAlign: TextAlign.center,
+                                      maxLines: 2,
+                                      style: TextStyle(
+                                        color: AppConstants.primaryColor,
+                                        fontSize: titleSize,
+                                        fontWeight: FontWeight.w700,
+                                        letterSpacing: 0.5,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ),
@@ -131,14 +147,19 @@ class _WelcomeAnimationPageState extends State<WelcomeAnimationPage>
                           height: 56,
                           decoration: BoxDecoration(
                             gradient: const LinearGradient(
-                              colors: [Color(0xFF007AFF), Color(0xFF0051D5)],
+                              colors: [
+                                AppConstants.primaryColor,
+                                Color(0xFF0051D5),
+                              ],
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
                             ),
                             borderRadius: BorderRadius.circular(16),
                             boxShadow: [
                               BoxShadow(
-                                color: const Color(0xFF007AFF).withValues(alpha: 0.4),
+                                color: AppConstants.primaryColor.withValues(
+                                  alpha: 0.4,
+                                ),
                                 blurRadius: 15,
                                 offset: const Offset(0, 8),
                               ),

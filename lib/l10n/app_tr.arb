@@ -1,7 +1,13 @@
 {
   "@@locale": "tr",
   "appTitle": "UniGuide",
-  "videoUrl": "dQw4w9WgXcQ",
+  "videoUrl": "https://youtu.be/hROnXqnCrDk?si=r-6xCZM5G5KG3B6r",
+
+  "themeModeTitle": "Theme mode",
+  "themeModeSystem": "System",
+  "themeModeLight": "Light",
+  "themeModeDark": "Dark",
+
   "welcome": "UniGuide'a hoş geldiniz",
   "chooseLanguage": "Dil seçin",
   "back": "Geri",

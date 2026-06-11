@@ -27,7 +27,19 @@ class AppLocalizationsTr extends AppLocalizations {
   String get next => 'İleri';
 
   @override
-  String get videoUrl => 'dQw4w9WgXcQ';
+  String get videoUrl => 'https://youtu.be/hROnXqnCrDk?si=r-6xCZM5G5KG3B6r';
+
+  @override
+  String get themeModeTitle => 'Theme mode';
+
+  @override
+  String get themeModeSystem => 'System';
+
+  @override
+  String get themeModeLight => 'Light';
+
+  @override
+  String get themeModeDark => 'Dark';
 
   @override
   String get tasks => 'Görevler';

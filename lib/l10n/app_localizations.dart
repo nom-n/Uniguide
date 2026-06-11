@@ -149,8 +149,32 @@ abstract class AppLocalizations {
   /// No description provided for @videoUrl.
   ///
   /// In en, this message translates to:
-  /// **'dQw4w9WgXcQ'**
+  /// **'https://youtu.be/UU73GwGwOUM?si=f9VZtttBwnkSmKOe'**
   String get videoUrl;
+
+  /// No description provided for @themeModeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme mode'**
+  String get themeModeTitle;
+
+  /// No description provided for @themeModeSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'System'**
+  String get themeModeSystem;
+
+  /// No description provided for @themeModeLight.
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get themeModeLight;
+
+  /// No description provided for @themeModeDark.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark'**
+  String get themeModeDark;
 
   /// No description provided for @tasks.
   ///

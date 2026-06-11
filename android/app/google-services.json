@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "494255805135",
+    "project_id": "uniguide-fe9a7",
+    "storage_bucket": "uniguide-fe9a7.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:494255805135:android:104c6339d556ed33395dba",
+        "android_client_info": {
+          "package_name": "com.uniguide.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDbQ-Gfn_50NYomMMjoA1KNBsnAOiHCjio"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

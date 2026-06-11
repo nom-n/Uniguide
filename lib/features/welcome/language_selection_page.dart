@@ -1,5 +1,6 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uniguide/core/constants/app_constants.dart';
 import 'package:uniguide/l10n/app_localizations.dart';
 import 'package:uniguide/main.dart';
 import 'province_selection_page.dart';
@@ -52,7 +53,7 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage>
   Future<void> _restoreLocaleFromPrefs() async {
     final prefs = await SharedPreferences.getInstance();
     if (!mounted) return;
-    final code = prefs.getString('lang');
+    final code = prefs.getString(AppConstants.kPrefsLangKey);
     if (code == null) return;
     UniGuideApp.setLocale(context, Locale(code));
   }
@@ -72,7 +73,7 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage>
     await Future.delayed(const Duration(milliseconds: 300));
 
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('lang', code);
+    await prefs.setString(AppConstants.kPrefsLangKey, code);
 
     if (!mounted) return;
     Navigator.pushReplacement(
@@ -119,6 +120,13 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage>
                   child: _buildBackButton(isMobile, isSmallScreen),
                 ),
                 SizedBox(height: _getSpacing(isMobile, isSmallScreen, isTablet)),
+                Image.asset(
+                  'assets/images/app_logo.png',
+                  width: isMobile ? 90 : 110,
+                  height: isMobile ? 90 : 110,
+                  fit: BoxFit.contain,
+                ),
+                const SizedBox(height: 14),
                 _buildTitle(isMobile, isSmallScreen),
                 SizedBox(height: _getSpacing(isMobile, isSmallScreen, isTablet)),
                 if (_showLanguageBox)

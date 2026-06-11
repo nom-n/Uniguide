@@ -2,6 +2,12 @@
   "@@locale": "so",
   "appTitle": "UniGuide",
   "videoUrl": "dQw4w9WgXcQ",
+
+  "themeModeTitle": "Theme mode",
+  "themeModeSystem": "System",
+  "themeModeLight": "Light",
+  "themeModeDark": "Dark",
+
   "welcome": "Ku soo dhawoow UniGuide",
   "chooseLanguage": "Dooro luqaddaada",
   "back": "Keen",

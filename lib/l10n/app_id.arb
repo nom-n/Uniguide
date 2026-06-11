@@ -11,6 +11,11 @@
   },
   "videoUrl": "dQw4w9WgXcQ",
 
+  "themeModeTitle": "Theme mode",
+  "themeModeSystem": "System",
+  "themeModeLight": "Light",
+  "themeModeDark": "Dark",
+
   "tasks": "Tugas",
   "services": "Layanan",
   "nextStep": "Mulai pendaftaran universitas",

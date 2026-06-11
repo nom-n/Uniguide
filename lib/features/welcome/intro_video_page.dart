@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:uniguide/core/navigation/main_navigation.dart';
 import 'package:uniguide/l10n/app_localizations.dart';
-import 'package:webview_flutter/webview_flutter.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'province_selection_page.dart';
 
 class IntroVideoPage extends StatefulWidget {
@@ -14,8 +15,11 @@ class IntroVideoPage extends StatefulWidget {
 class _IntroVideoPageState extends State<IntroVideoPage>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  late WebViewController _webViewController;
-  String _videoId = 'dQw4w9WgXcQ'; // القيمة الافتراضية
+  InAppWebViewController? _webViewController;
+  String _videoUrl = 'https://youtu.be/UU73GwGwOUM';
+  String _embedUrl = '';
+  bool _isLoading = true;
+  String? _lastError;
 
   @override
   void initState() {
@@ -26,21 +30,24 @@ class _IntroVideoPageState extends State<IntroVideoPage>
     );
     _controller.forward();
 
-    // تهيئة WebView
-    _webViewController = WebViewController()
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..loadHtmlString(_getYouTubeEmbedHtml());
+    _embedUrl = _getYouTubeEmbedUrl();
+
+    // إعداد رابط الـ embed فقط؛ الـ InAppWebView سيحمّل الرابط عند بنائه.
+    // لا حاجة لتهيئة المتحكّم هنا.
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     // الحصول على رابط الفيديو من اللغة المختارة
-    final newVideoId = AppLocalizations.of(context)?.videoUrl ?? 'dQw4w9WgXcQ';
-    if (_videoId != newVideoId) {
-      _videoId = newVideoId;
+    final newVideoUrl = AppLocalizations.of(context)?.videoUrl ?? 'dQw4w9WgXcQ';
+    if (_videoUrl != newVideoUrl) {
+      _videoUrl = newVideoUrl;
+      _embedUrl = _getYouTubeEmbedUrl();
       // إعادة تحميل الفيديو بالرابط الجديد
-      _webViewController.loadHtmlString(_getYouTubeEmbedHtml());
+      _webViewController?.loadUrl(
+        urlRequest: URLRequest(url: WebUri(_embedUrl)),
+      );
     }
   }
 
@@ -50,30 +57,52 @@ class _IntroVideoPageState extends State<IntroVideoPage>
     super.dispose();
   }
 
-  String _getYouTubeEmbedHtml() {
-    return '''
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <style>
-            html, body { margin: 0; padding: 0; height: 100%; background: #000; }
-            .video-container { position: relative; width: 100%; height: 100%; }
-            iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: none; }
-        </style>
-    </head>
-    <body>
-        <div class="video-container">
-            <iframe 
-                src="https://www.youtube.com/embed/$_videoId?autoplay=1&mute=1&loop=1&playlist=$_videoId"
-                frameborder="0" 
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                allowfullscreen>
-            </iframe>
-        </div>
-    </body>
-    </html>
-    ''';
+  String _getYouTubeEmbedUrl() {
+    final videoId = _extractYouTubeId(_videoUrl);
+    if (videoId == null) {
+      return 'about:blank';
+    }
+    // إضافة origin و enablejsapi لحل مشاكل التوافق
+    return 'https://www.youtube.com/embed/$videoId?autoplay=1&mute=1&playsinline=1&enablejsapi=1&origin=https://www.youtube.com';
+  }
+
+  Future<void> _openExternally() async {
+    final uri = Uri.tryParse(_videoUrl) ?? Uri.parse(_embedUrl);
+    try {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Unable to open external URL')),
+      );
+    }
+  }
+
+  String? _extractYouTubeId(String url) {
+    final trimmed = url.trim();
+    if (trimmed.isEmpty) return null;
+
+    final uri = Uri.tryParse(trimmed);
+    if (uri != null) {
+      if (uri.host.contains('youtu.be')) {
+        return uri.pathSegments.isNotEmpty ? uri.pathSegments.last : null;
+      }
+      if (uri.host.contains('youtube.com')) {
+        if (uri.pathSegments.contains('watch')) {
+          return uri.queryParameters['v'];
+        }
+        final embedIndex = uri.pathSegments.indexOf('embed');
+        if (embedIndex >= 0 && embedIndex + 1 < uri.pathSegments.length) {
+          return uri.pathSegments[embedIndex + 1];
+        }
+      }
+    }
+
+    if (RegExp(r'^[a-zA-Z0-9_-]{11}$').hasMatch(trimmed)) {
+      return trimmed;
+    }
+
+    return null;
   }
 
   void _goBack() {
@@ -110,9 +139,8 @@ class _IntroVideoPageState extends State<IntroVideoPage>
             builder: (context, constraints) {
               const topChrome = 72.0;
               const bottomChrome = 108.0;
-              final usableH =
-                  (constraints.maxHeight - topChrome - bottomChrome)
-                      .clamp(160.0, double.infinity);
+              final usableH = (constraints.maxHeight - topChrome - bottomChrome)
+                  .clamp(160.0, double.infinity);
               final maxW = constraints.maxWidth * 0.92;
               var boxW = maxW;
               var boxH = boxW * 9 / 16;
@@ -151,7 +179,107 @@ class _IntroVideoPageState extends State<IntroVideoPage>
                         ),
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(24),
-                          child: WebViewWidget(controller: _webViewController),
+                          child: Stack(
+                            children: [
+                              InAppWebView(
+                                initialUrlRequest: URLRequest(
+                                  url: WebUri(_embedUrl),
+                                ),
+                                initialSettings: InAppWebViewSettings(
+                                  javaScriptEnabled: true,
+                                  mediaPlaybackRequiresUserGesture: false,
+                                  allowsInlineMediaPlayback: true,
+                                  // استخدام User-Agent لمتصفح كروم ديسكتوب لتجاوز قيود يوتيوب موبايل
+                                  userAgent:
+                                      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+                                  useHybridComposition: true,
+                                  domStorageEnabled: true,
+                                  safeBrowsingEnabled: false,
+                                  mixedContentMode: MixedContentMode
+                                      .MIXED_CONTENT_ALWAYS_ALLOW,
+                                ),
+                                onWebViewCreated: (controller) {
+                                  _webViewController = controller;
+                                },
+                                onLoadStart: (controller, url) {
+                                  setState(() {
+                                    _isLoading = true;
+                                    _lastError = null;
+                                  });
+                                },
+                                onLoadStop: (controller, url) async {
+                                  setState(() {
+                                    _isLoading = false;
+                                  });
+                                },
+                                onReceivedError: (controller, request, error) {
+                                  setState(() {
+                                    _lastError = error.toString();
+                                    _isLoading = false;
+                                  });
+                                },
+                              ),
+                              if (_isLoading)
+                                Container(
+                                  color: Colors.black.withValues(alpha: 0.55),
+                                  child: const Center(
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              if (_lastError != null)
+                                Container(
+                                  color: Colors.black.withValues(alpha: 0.75),
+                                  padding: const EdgeInsets.all(16),
+                                  child: Center(
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          'WebView error:\n$_lastError',
+                                          textAlign: TextAlign.center,
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 12),
+                                        ElevatedButton(
+                                          onPressed: _openExternally,
+                                          child: const Text('Open in YouTube'),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              if (_extractYouTubeId(_videoUrl) == null)
+                                Container(
+                                  color: Colors.black.withValues(alpha: 0.75),
+                                  padding: const EdgeInsets.all(16),
+                                  child: Center(
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          'Invalid YouTube URL.\nيرجى التحقق من الرابط.',
+                                          textAlign: TextAlign.center,
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 12),
+                                        ElevatedButton(
+                                          onPressed: _openExternally,
+                                          child: const Text('Open source URL'),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -234,7 +362,9 @@ class _IntroVideoPageState extends State<IntroVideoPage>
                           borderRadius: BorderRadius.circular(16),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFF007AFF).withValues(alpha: 0.4),
+                              color: const Color(
+                                0xFF007AFF,
+                              ).withValues(alpha: 0.4),
                               blurRadius: 15,
                               offset: const Offset(0, 8),
                             ),
@@ -248,8 +378,11 @@ class _IntroVideoPageState extends State<IntroVideoPage>
                                 context,
                                 PageRouteBuilder(
                                   pageBuilder:
-                                      (context, animation, secondaryAnimation) =>
-                                          const MainNavigation(),
+                                      (
+                                        context,
+                                        animation,
+                                        secondaryAnimation,
+                                      ) => const MainNavigation(),
                                   transitionsBuilder:
                                       (
                                         context,
