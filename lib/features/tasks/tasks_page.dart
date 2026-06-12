@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:uniguide/core/content/student_guide_content.dart';
 import 'package:uniguide/features/guides/guide_detail_page.dart';
+import 'package:uniguide/l10n/app_localizations.dart';
 
 const _completedTaskIdsKey = 'completed_task_ids';
 
@@ -40,8 +41,8 @@ class _TasksPageState extends State<TasksPage> {
 
   @override
   Widget build(BuildContext context) {
+    final lang = AppLocalizations.of(context)!;
     final locale = Localizations.localeOf(context);
-    final isArabic = locale.languageCode == 'ar';
     final tasks = StudentGuideContent.tasks(locale);
     final progress = tasks.isEmpty ? 0.0 : _completedIds.length / tasks.length;
     final nextArticle = StudentGuideContent.nextRecommendedArticle(
@@ -50,9 +51,7 @@ class _TasksPageState extends State<TasksPage> {
     );
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(isArabic ? 'خطة الاستقرار' : 'Settlement plan'),
-      ),
+      appBar: AppBar(title: Text(lang.settlementPlan)),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 28),
         children: [
@@ -65,7 +64,7 @@ class _TasksPageState extends State<TasksPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    isArabic ? 'تقدمك' : 'Your progress',
+                    lang.yourProgress,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w800,
                     ),
@@ -73,11 +72,7 @@ class _TasksPageState extends State<TasksPage> {
                   const SizedBox(height: 10),
                   LinearProgressIndicator(value: progress),
                   const SizedBox(height: 8),
-                  Text(
-                    isArabic
-                        ? 'أنجزت ${_completedIds.length} من ${tasks.length} خطوات'
-                        : 'Completed ${_completedIds.length} of ${tasks.length} steps',
-                  ),
+                  Text(lang.completedSteps(_completedIds.length, tasks.length)),
                 ],
               ),
             ),
@@ -88,9 +83,7 @@ class _TasksPageState extends State<TasksPage> {
               elevation: 0,
               child: ListTile(
                 leading: const Icon(Icons.auto_awesome),
-                title: Text(
-                  isArabic ? 'الخطوة المقترحة التالية' : 'Suggested next step',
-                ),
+                title: Text(lang.suggestedNextStep),
                 subtitle: Text(nextArticle.title),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => Navigator.of(context).push(

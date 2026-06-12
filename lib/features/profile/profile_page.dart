@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:uniguide/l10n/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uniguide/core/auth/auth_service.dart';
 import 'package:uniguide/core/constants/app_constants.dart';
-import 'package:uniguide/l10n/app_localizations.dart';
 import 'package:uniguide/main.dart';
 import 'package:uniguide/features/settings/settings_page.dart';
 
@@ -221,20 +221,20 @@ class _ProfilePageState extends State<ProfilePage>
         children: [
           _SectionTitle(
             icon: Icons.lock_outline,
-            title: 'Welcome back',
-            subtitle: 'Sign in with your email and password.',
+            title: AppLocalizations.of(context)!.authWelcomeBackTitle,
+            subtitle: AppLocalizations.of(context)!.authWelcomeBackSubtitle,
           ),
           const SizedBox(height: 18),
           _AppTextField(
             controller: _emailController,
-            label: 'Email',
+            label: AppLocalizations.of(context)!.emailLabel,
             icon: Icons.alternate_email,
             keyboardType: TextInputType.emailAddress,
           ),
           const SizedBox(height: 12),
           _AppTextField(
             controller: _passwordController,
-            label: 'Password',
+            label: AppLocalizations.of(context)!.password,
             icon: Icons.password,
             obscureText: true,
           ),
@@ -258,13 +258,13 @@ class _ProfilePageState extends State<ProfilePage>
                     ),
                   )
                 : const Icon(Icons.arrow_forward),
-            label: const Text('Sign in'),
+            label: Text(AppLocalizations.of(context)!.signIn),
           ),
           Align(
             alignment: Alignment.center,
             child: TextButton(
               onPressed: _loading ? null : () => _showResetDialog(auth),
-              child: const Text('Forgot password?'),
+              child: Text(AppLocalizations.of(context)!.forgotPassword),
             ),
           ),
         ],
@@ -293,15 +293,15 @@ class _ProfilePageState extends State<ProfilePage>
       children: [
         const _StepPills(activeIndex: 0),
         const SizedBox(height: 18),
-        const _SectionTitle(
+        _SectionTitle(
           icon: Icons.mail_outline,
-          title: 'Verify your email',
-          subtitle: 'We will send a 6-digit code before creating the account.',
+          title: AppLocalizations.of(context)!.authVerifyEmailTitle,
+          subtitle: AppLocalizations.of(context)!.authVerifyEmailSubtitle,
         ),
         const SizedBox(height: 18),
         _AppTextField(
           controller: _emailController,
-          label: 'Email',
+          label: AppLocalizations.of(context)!.emailLabel,
           icon: Icons.alternate_email,
           keyboardType: TextInputType.emailAddress,
         ),
@@ -319,7 +319,7 @@ class _ProfilePageState extends State<ProfilePage>
                   }
                 }),
           icon: const Icon(Icons.mark_email_read_outlined),
-          label: const Text('Send code'),
+          label: Text(AppLocalizations.of(context)!.sendCode),
         ),
       ],
     );
@@ -332,15 +332,15 @@ class _ProfilePageState extends State<ProfilePage>
       children: [
         const _StepPills(activeIndex: 1),
         const SizedBox(height: 18),
-        const _SectionTitle(
+        _SectionTitle(
           icon: Icons.verified_outlined,
-          title: 'Enter the code',
-          subtitle: 'Check your inbox and type the code here.',
+          title: AppLocalizations.of(context)!.authEnterCodeTitle,
+          subtitle: AppLocalizations.of(context)!.authEnterCodeSubtitle,
         ),
         const SizedBox(height: 18),
         _AppTextField(
           controller: _otpController,
-          label: '6-digit code',
+          label: AppLocalizations.of(context)!.sixDigitCodeLabel,
           icon: Icons.pin_outlined,
           keyboardType: TextInputType.number,
           maxLength: 6,
@@ -352,7 +352,7 @@ class _ProfilePageState extends State<ProfilePage>
               onPressed: _loading
                   ? null
                   : () => setState(() => _registerStep = _RegisterStep.email),
-              child: const Text('Change email'),
+              child: Text(AppLocalizations.of(context)!.changeEmail),
             ),
             const Spacer(),
             TextButton(
@@ -366,7 +366,7 @@ class _ProfilePageState extends State<ProfilePage>
                         setState(() => _message = 'Development OTP: $devCode');
                       }
                     }),
-              child: const Text('Resend'),
+              child: Text(AppLocalizations.of(context)!.resend),
             ),
           ],
         ),
@@ -388,7 +388,7 @@ class _ProfilePageState extends State<ProfilePage>
                   });
                 }),
           icon: const Icon(Icons.check_circle_outline),
-          label: const Text('Verify code'),
+          label: Text(AppLocalizations.of(context)!.verifyCode),
         ),
       ],
     );
@@ -405,10 +405,10 @@ class _ProfilePageState extends State<ProfilePage>
       children: [
         const _StepPills(activeIndex: 2),
         const SizedBox(height: 18),
-        const _SectionTitle(
+        _SectionTitle(
           icon: Icons.auto_awesome,
-          title: 'Complete your profile',
-          subtitle: 'Add your name, password, and a personal emoji.',
+          title: AppLocalizations.of(context)!.authCompleteProfileTitle,
+          subtitle: AppLocalizations.of(context)!.authCompleteProfileSubtitle,
         ),
         const SizedBox(height: 18),
         Row(
@@ -424,7 +424,7 @@ class _ProfilePageState extends State<ProfilePage>
             Expanded(
               child: _AppTextField(
                 controller: _lastNameController,
-                label: 'Last name',
+                label: AppLocalizations.of(context)!.lastNameLabel,
                 icon: Icons.badge,
               ),
             ),
@@ -433,15 +433,19 @@ class _ProfilePageState extends State<ProfilePage>
         const SizedBox(height: 12),
         _AppTextField(
           controller: _passwordController,
-          label: 'Password',
+          label: AppLocalizations.of(context)!.password,
           icon: Icons.password,
           obscureText: true,
         ),
         const SizedBox(height: 14),
         _ChoiceGroup(
-          label: 'Gender',
+          label: AppLocalizations.of(context)!.genderLabel,
           selected: _gender,
-          values: const {'male': 'Male', 'female': 'Female', 'other': 'Other'},
+          values: {
+            'male': AppLocalizations.of(context)!.genderMale,
+            'female': AppLocalizations.of(context)!.genderFemale,
+            'other': AppLocalizations.of(context)!.genderOther,
+          },
           onChanged: (value) {
             setState(() {
               _gender = value;
@@ -472,7 +476,9 @@ class _ProfilePageState extends State<ProfilePage>
               : () => _runAction(() {
                   final ticket = _registrationTicket;
                   if (ticket == null || ticket.isEmpty) {
-                    throw const AuthException('Verify your email first.');
+                    throw AuthException(
+                      AppLocalizations.of(context)!.verifyEmailFirst,
+                    );
                   }
                   return auth.registerWithEmail(
                     email: _emailController.text,
@@ -486,7 +492,7 @@ class _ProfilePageState extends State<ProfilePage>
                   );
                 }),
           icon: const Icon(Icons.person_add_alt_1),
-          label: const Text('Create account'),
+          label: Text(AppLocalizations.of(context)!.createAccount),
         ),
       ],
     );
@@ -506,17 +512,19 @@ class _ProfilePageState extends State<ProfilePage>
           items: [
             _ProfileStat(
               icon: Icons.verified_user_outlined,
-              label: 'Email',
-              value: user.emailVerified ? 'Verified' : 'Needs OTP',
+              label: AppLocalizations.of(context)!.emailLabel,
+              value: user.emailVerified
+                  ? AppLocalizations.of(context)!.verified
+                  : AppLocalizations.of(context)!.needsOtp,
             ),
             _ProfileStat(
               icon: Icons.login,
-              label: 'Provider',
+              label: AppLocalizations.of(context)!.providerLabel,
               value: user.authProvider ?? 'email',
             ),
             _ProfileStat(
               icon: Icons.cake_outlined,
-              label: 'Age',
+              label: AppLocalizations.of(context)!.ageLabel,
               value: age == null ? '-' : '$age',
             ),
           ],
@@ -525,7 +533,7 @@ class _ProfilePageState extends State<ProfilePage>
         Card(
           child: ListTile(
             leading: const Icon(Icons.settings),
-            title: const Text('Settings'),
+            title: Text(AppLocalizations.of(context)!.settings),
             onTap: () {
               Navigator.of(
                 context,
@@ -583,10 +591,10 @@ class _ProfilePageState extends State<ProfilePage>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const _SectionTitle(
+              _SectionTitle(
                 icon: Icons.manage_accounts_outlined,
-                title: 'Account controls',
-                subtitle: 'Keep your session and profile fresh.',
+                title: AppLocalizations.of(context)!.accountControls,
+                subtitle: AppLocalizations.of(context)!.accountControlsSubtitle,
               ),
               const SizedBox(height: 14),
               Wrap(
@@ -601,21 +609,21 @@ class _ProfilePageState extends State<ProfilePage>
                       backgroundColor: _kAppPrimary.withValues(alpha: 0.2),
                     ),
                     icon: const Icon(Icons.refresh),
-                    label: const Text('Refresh'),
+                    label: Text(AppLocalizations.of(context)!.refresh),
                   ),
                   OutlinedButton.icon(
                     onPressed: _loading
                         ? null
                         : () => _runAction(() => auth.signOut()),
                     icon: const Icon(Icons.logout),
-                    label: const Text('Sign out'),
+                    label: Text(AppLocalizations.of(context)!.signOut),
                   ),
                   OutlinedButton.icon(
                     onPressed: _loading
                         ? null
                         : () => _runAction(() => auth.signOutAllDevices()),
                     icon: const Icon(Icons.devices_other),
-                    label: const Text('All devices'),
+                    label: Text(AppLocalizations.of(context)!.allDevices),
                   ),
                 ],
               ),
@@ -655,17 +663,17 @@ class _ProfilePageState extends State<ProfilePage>
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Reset password'),
+          title: Text(AppLocalizations.of(context)!.resetPassword),
           content: _AppTextField(
             controller: _resetEmailController,
-            label: 'Email',
+            label: AppLocalizations.of(context)!.emailLabel,
             icon: Icons.alternate_email,
             keyboardType: TextInputType.emailAddress,
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
+              child: Text(AppLocalizations.of(context)!.cancel),
             ),
             FilledButton(
               onPressed: () {
@@ -674,7 +682,7 @@ class _ProfilePageState extends State<ProfilePage>
                   () => auth.sendPasswordReset(_resetEmailController.text),
                 );
               },
-              child: const Text('Send'),
+              child: Text(AppLocalizations.of(context)!.send),
             ),
           ],
         );
@@ -731,8 +739,8 @@ class _AuthHeader extends StatelessWidget {
           const SizedBox(height: 18),
           Text(
             mode == _AuthMode.signIn
-                ? 'Your UniGuide account'
-                : 'Join UniGuide',
+                ? AppLocalizations.of(context)!.authWelcomeBackTitle
+                : AppLocalizations.of(context)!.authJoinTitle,
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
               fontWeight: FontWeight.w800,
               color: Colors.black,
@@ -741,8 +749,8 @@ class _AuthHeader extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             mode == _AuthMode.signIn
-                ? 'A calmer profile space for your university journey.'
-                : 'Start with email verification, then shape your profile.',
+                ? AppLocalizations.of(context)!.authWelcomeBackSubtitle
+                : AppLocalizations.of(context)!.authJoinSubtitle,
             style: Theme.of(
               context,
             ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
@@ -762,16 +770,16 @@ class _ModeSwitch extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SegmentedButton<_AuthMode>(
-      segments: const [
+      segments: [
         ButtonSegment(
           value: _AuthMode.signIn,
-          icon: Icon(Icons.login),
-          label: Text('Sign in'),
+          icon: const Icon(Icons.login),
+          label: Text(AppLocalizations.of(context)!.signIn),
         ),
         ButtonSegment(
           value: _AuthMode.register,
-          icon: Icon(Icons.person_add_alt),
-          label: Text('Register'),
+          icon: const Icon(Icons.person_add_alt),
+          label: Text(AppLocalizations.of(context)!.register),
         ),
       ],
       selected: {mode},
@@ -802,7 +810,7 @@ class _SocialButtons extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12),
               child: Text(
-                'or continue with',
+                AppLocalizations.of(context)!.orContinueWith,
                 style: Theme.of(context).textTheme.labelMedium,
               ),
             ),
@@ -816,7 +824,7 @@ class _SocialButtons extends StatelessWidget {
               child: OutlinedButton.icon(
                 onPressed: loading ? null : onGoogle,
                 icon: const Icon(Icons.g_mobiledata, size: 28),
-                label: const Text('Google'),
+                label: Text(AppLocalizations.of(context)!.google),
               ),
             ),
             const SizedBox(width: 12),
@@ -824,7 +832,7 @@ class _SocialButtons extends StatelessWidget {
               child: OutlinedButton.icon(
                 onPressed: loading ? null : onApple,
                 icon: const Icon(Icons.apple),
-                label: const Text('Apple'),
+                label: Text(AppLocalizations.of(context)!.apple),
               ),
             ),
           ],
@@ -960,7 +968,12 @@ class _StepPills extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const labels = ['Email', 'OTP', 'Profile'];
+    final lang = AppLocalizations.of(context)!;
+    final labels = [
+      lang.emailStepLabel,
+      lang.otpStepLabel,
+      lang.profileStepLabel,
+    ];
     return Row(
       children: [
         for (var i = 0; i < labels.length; i++) ...[
@@ -1044,7 +1057,7 @@ class _BirthYearPicker extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Birth year: $value',
+          AppLocalizations.of(context)!.birthYearLabel(value),
           style: const TextStyle(fontWeight: FontWeight.w700),
         ),
         Slider(
@@ -1077,9 +1090,9 @@ class _EmojiPicker extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Choose your emoji',
-          style: TextStyle(fontWeight: FontWeight.w700),
+        Text(
+          AppLocalizations.of(context)!.chooseEmoji,
+          style: const TextStyle(fontWeight: FontWeight.w700),
         ),
         const SizedBox(height: 8),
         Wrap(
@@ -1088,7 +1101,7 @@ class _EmojiPicker extends StatelessWidget {
           children: emojis.map((emoji) {
             final isSelected = emoji == selected;
             return Tooltip(
-              message: 'Select $emoji',
+              message: AppLocalizations.of(context)!.selectEmoji(emoji),
               child: InkWell(
                 borderRadius: BorderRadius.circular(8),
                 onTap: () => onChanged(emoji),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:uniguide/core/content/student_guide_content.dart';
 import 'package:uniguide/features/guides/guide_detail_page.dart';
+import 'package:uniguide/l10n/app_localizations.dart';
 
 class GuidesPage extends StatefulWidget {
   const GuidesPage({super.key, this.initialCategory});
@@ -30,27 +31,25 @@ class _GuidesPageState extends State<GuidesPage> {
 
   @override
   Widget build(BuildContext context) {
+    final lang = AppLocalizations.of(context)!;
     final locale = Localizations.localeOf(context);
     final articles = StudentGuideContent.articles(locale).where((article) {
       final categoryMatches =
           _selectedCategory == null || article.category == _selectedCategory;
       return categoryMatches && article.matches(_searchController.text);
     }).toList();
-    final isArabic = locale.languageCode == 'ar';
 
     return Scaffold(
-      appBar: AppBar(title: Text(isArabic ? 'دليل الطالب' : 'Student guide')),
+      appBar: AppBar(title: Text(lang.studentGuideTitle)),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 28),
         children: [
           Semantics(
             textField: true,
-            label: isArabic ? 'بحث داخل الدليل' : 'Search guide content',
+            label: lang.searchGuideLabel,
             child: SearchBar(
               controller: _searchController,
-              hintText: isArabic
-                  ? 'ابحث عن إقامة، بنك، سكن...'
-                  : 'Search residence, bank, housing...',
+              hintText: lang.searchGuideHint,
               leading: const Icon(Icons.search),
               onChanged: (_) => setState(() {}),
             ),
@@ -63,11 +62,7 @@ class _GuidesPageState extends State<GuidesPage> {
           ),
           const SizedBox(height: 14),
           if (articles.isEmpty)
-            _EmptyState(
-              message: isArabic
-                  ? 'لا توجد نتائج مطابقة.'
-                  : 'No matching results.',
-            )
+            _EmptyState(message: lang.noMatchingResults)
           else
             LayoutBuilder(
               builder: (context, constraints) {
@@ -112,8 +107,6 @@ class _CategoryFilter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final locale = Localizations.localeOf(context);
-    final isArabic = locale.languageCode == 'ar';
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(
@@ -121,7 +114,7 @@ class _CategoryFilter extends StatelessWidget {
           Padding(
             padding: const EdgeInsetsDirectional.only(end: 8),
             child: FilterChip(
-              label: Text(isArabic ? 'الكل' : 'All'),
+              label: Text(AppLocalizations.of(context)!.all),
               selected: selected == null,
               onSelected: (_) => onChanged(null),
             ),
@@ -131,7 +124,7 @@ class _CategoryFilter extends StatelessWidget {
               padding: const EdgeInsetsDirectional.only(end: 8),
               child: FilterChip(
                 label: Text(
-                  StudentGuideContent.categoryLabel(category, locale),
+                  StudentGuideContent.categoryLabel(category, context),
                 ),
                 selected: selected == category,
                 onSelected: (_) => onChanged(category),
@@ -151,7 +144,6 @@ class _GuideCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final locale = Localizations.localeOf(context);
     return Card(
       elevation: 0,
       clipBehavior: Clip.antiAlias,
@@ -170,7 +162,7 @@ class _GuideCard extends StatelessWidget {
                     child: Text(
                       StudentGuideContent.categoryLabel(
                         article.category,
-                        locale,
+                        context,
                       ),
                       style: Theme.of(context).textTheme.labelLarge,
                     ),

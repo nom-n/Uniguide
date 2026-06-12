@@ -94,10 +94,14 @@ class _ProvinceSelectionPageState extends State<ProvinceSelectionPage>
     }
   }
 
-  Future<void> _onNext() async {
-    if (_selected == null) return;
+  Future<void> _selectProvince(String id) async {
+    setState(() => _selected = id);
+
+    await Future.delayed(const Duration(milliseconds: 300));
+
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(AppConstants.kPrefsProvinceKey, _selected!);
+    await prefs.setString(AppConstants.kPrefsProvinceKey, id);
+
     if (!mounted) return;
     Navigator.pushReplacement(
       context,
@@ -156,8 +160,6 @@ class _ProvinceSelectionPageState extends State<ProvinceSelectionPage>
                       ),
                     ),
                   ),
-                if (_showList && _selected != null)
-                  _buildNextButton(isMobile, isSmallScreen, lang),
               ],
             ),
           ),
@@ -195,12 +197,6 @@ class _ProvinceSelectionPageState extends State<ProvinceSelectionPage>
 
   double _getCheckIconSize(bool isMobile, bool isSmallScreen) =>
       isMobile ? 12 : (isSmallScreen ? 14 : 16);
-
-  double _getButtonHeight(bool isMobile, bool isSmallScreen) =>
-      isMobile ? 48 : (isSmallScreen ? 50 : 56);
-
-  double _getButtonFontSize(bool isMobile, bool isSmallScreen) =>
-      isMobile ? 14 : (isSmallScreen ? 16 : 18);
 
   Widget _buildBackButton(
     bool isMobile,
@@ -341,7 +337,7 @@ class _ProvinceSelectionPageState extends State<ProvinceSelectionPage>
         Material(
           color: Colors.transparent,
           child: InkWell(
-            onTap: () => setState(() => _selected = code),
+            onTap: () => _selectProvince(code),
             borderRadius: BorderRadius.circular(12),
             child: Padding(
               padding: EdgeInsets.symmetric(
@@ -422,54 +418,5 @@ class _ProvinceSelectionPageState extends State<ProvinceSelectionPage>
         ),
       );
     }
-  }
-
-  Widget _buildNextButton(
-    bool isMobile,
-    bool isSmallScreen,
-    AppLocalizations l,
-  ) {
-    return Padding(
-      padding: EdgeInsets.symmetric(
-        vertical: isMobile ? 16 : (isSmallScreen ? 20 : 24),
-      ),
-      child: Container(
-        width: double.infinity,
-        height: _getButtonHeight(isMobile, isSmallScreen),
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [Color(0xFF007AFF), Color(0xFF0051D5)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFF007AFF).withValues(alpha: 0.4),
-              blurRadius: 15,
-              offset: const Offset(0, 8),
-            ),
-          ],
-        ),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            borderRadius: BorderRadius.circular(16),
-            onTap: _onNext,
-            child: Center(
-              child: Text(
-                l.next,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: _getButtonFontSize(isMobile, isSmallScreen),
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 0.5,
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
   }
 }

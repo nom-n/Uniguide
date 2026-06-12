@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'package:uniguide/core/content/student_guide_content.dart';
+import 'package:uniguide/l10n/app_localizations.dart';
 
 class GuideDetailPage extends StatelessWidget {
   const GuideDetailPage({super.key, required this.article});
@@ -11,6 +12,7 @@ class GuideDetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final locale = Localizations.localeOf(context);
+    final lang = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(title: Text(article.title)),
       body: ListView(
@@ -23,7 +25,7 @@ class GuideDetailPage extends StatelessWidget {
           if (article.category == GuideCategory.maps) ...[
             const SizedBox(height: 10),
             Text(
-              locale.languageCode == 'ar' ? 'مواقع مقترحة' : 'Suggested places',
+              lang.suggestedPlaces,
               style: Theme.of(
                 context,
               ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
@@ -116,9 +118,7 @@ class _StepCard extends StatelessWidget {
               const SizedBox(height: 12),
               _BulletGroup(
                 icon: Icons.description_outlined,
-                title: Localizations.localeOf(context).languageCode == 'ar'
-                    ? 'المستندات'
-                    : 'Documents',
+                title: AppLocalizations.of(context)!.documents,
                 values: step.requiredDocuments,
               ),
             ],
@@ -126,9 +126,7 @@ class _StepCard extends StatelessWidget {
               const SizedBox(height: 12),
               _BulletGroup(
                 icon: Icons.warning_amber_rounded,
-                title: Localizations.localeOf(context).languageCode == 'ar'
-                    ? 'تنبيهات'
-                    : 'Warnings',
+                title: AppLocalizations.of(context)!.warnings,
                 values: step.warnings,
               ),
             ],

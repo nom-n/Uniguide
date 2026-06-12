@@ -11,7 +11,7 @@ plugins {
 
 android {
     namespace = "com.uniguide.app"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -29,7 +29,7 @@ android {
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
+        targetSdk = 36
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
@@ -45,4 +45,13 @@ android {
 
 flutter {
     source = "../.."
+}
+
+configurations.all {
+    resolutionStrategy.force("androidx.biometric:biometric:1.2.0-alpha05")
+}
+
+dependencies {
+    // Explicit biometric dependency isn't required; this forces the published version that satisfies transitive requests.
+    implementation("androidx.biometric:biometric:1.2.0-alpha05")
 }

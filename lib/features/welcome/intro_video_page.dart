@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:uniguide/core/navigation/main_navigation.dart';
 import 'package:uniguide/l10n/app_localizations.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:youtube_player_iframe/youtube_player_iframe.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'province_selection_page.dart';
 
@@ -14,66 +14,77 @@ class IntroVideoPage extends StatefulWidget {
 
 class _IntroVideoPageState extends State<IntroVideoPage>
     with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  InAppWebViewController? _webViewController;
+  late AnimationController _animationController;
+  YoutubePlayerController? _youtubeController;
   String _videoUrl = 'https://youtu.be/UU73GwGwOUM';
-  String _embedUrl = '';
   bool _isLoading = true;
+  bool _showPlayerView = false;
   String? _lastError;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
+    _animationController = AnimationController(
       duration: const Duration(milliseconds: 1200),
       vsync: this,
     );
-    _controller.forward();
+    _animationController.forward();
+  }
 
-    _embedUrl = _getYouTubeEmbedUrl();
+  void _showPlayer() {
+    final videoId = _extractYouTubeId(_videoUrl);
+    if (videoId == null) return;
 
-    // إعداد رابط الـ embed فقط؛ الـ InAppWebView سيحمّل الرابط عند بنائه.
-    // لا حاجة لتهيئة المتحكّم هنا.
+    _youtubeController = YoutubePlayerController.fromVideoId(
+      videoId: videoId,
+      autoPlay: true,
+      params: const YoutubePlayerParams(
+        showFullscreenButton: true,
+        mute: false,
+        showControls: true,
+        playsInline: true,
+      ),
+    );
+
+    setState(() {
+      _showPlayerView = true;
+      _isLoading = false;
+    });
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // الحصول على رابط الفيديو من اللغة المختارة
-    final newVideoUrl = AppLocalizations.of(context)?.videoUrl ?? 'dQw4w9WgXcQ';
+    final newVideoUrl = AppLocalizations.of(context)?.videoUrl ?? 'UU73GwGwOUM';
     if (_videoUrl != newVideoUrl) {
       _videoUrl = newVideoUrl;
-      _embedUrl = _getYouTubeEmbedUrl();
-      // إعادة تحميل الفيديو بالرابط الجديد
-      _webViewController?.loadUrl(
-        urlRequest: URLRequest(url: WebUri(_embedUrl)),
-      );
+      if (_youtubeController != null) {
+        final videoId = _extractYouTubeId(_videoUrl);
+        if (videoId != null) {
+          _youtubeController!.loadVideoById(videoId: videoId);
+        }
+      }
     }
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _animationController.dispose();
+    _youtubeController?.close();
     super.dispose();
   }
 
-  String _getYouTubeEmbedUrl() {
-    final videoId = _extractYouTubeId(_videoUrl);
-    if (videoId == null) {
-      return 'about:blank';
-    }
-    // إضافة origin و enablejsapi لحل مشاكل التوافق
-    return 'https://www.youtube.com/embed/$videoId?autoplay=1&mute=1&playsinline=1&enablejsapi=1&origin=https://www.youtube.com';
-  }
-
   Future<void> _openExternally() async {
-    final uri = Uri.tryParse(_videoUrl) ?? Uri.parse(_embedUrl);
+    final uri = Uri.tryParse(_videoUrl);
+    if (uri == null) return;
     try {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Unable to open external URL')),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.unableToOpenExternalUrl),
+        ),
       );
     }
   }
@@ -109,8 +120,9 @@ class _IntroVideoPageState extends State<IntroVideoPage>
     Navigator.pushReplacement(
       context,
       PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) =>
-            const ProvinceSelectionPage(),
+        pageBuilder:
+            (context, animation, secondaryAnimation) =>
+                const ProvinceSelectionPage(),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           return FadeTransition(opacity: animation, child: child);
         },
@@ -139,8 +151,11 @@ class _IntroVideoPageState extends State<IntroVideoPage>
             builder: (context, constraints) {
               const topChrome = 72.0;
               const bottomChrome = 108.0;
-              final usableH = (constraints.maxHeight - topChrome - bottomChrome)
-                  .clamp(160.0, double.infinity);
+              final usableH =
+                  (constraints.maxHeight - topChrome - bottomChrome).clamp(
+                    160.0,
+                    double.infinity,
+                  );
               final maxW = constraints.maxWidth * 0.92;
               var boxW = maxW;
               var boxH = boxW * 9 / 16;
@@ -159,7 +174,7 @@ class _IntroVideoPageState extends State<IntroVideoPage>
                     child: ScaleTransition(
                       scale: Tween<double>(begin: 0.8, end: 1).animate(
                         CurvedAnimation(
-                          parent: _controller,
+                          parent: _animationController,
                           curve: Curves.easeOut,
                         ),
                       ),
@@ -181,45 +196,36 @@ class _IntroVideoPageState extends State<IntroVideoPage>
                           borderRadius: BorderRadius.circular(24),
                           child: Stack(
                             children: [
-                              InAppWebView(
-                                initialUrlRequest: URLRequest(
-                                  url: WebUri(_embedUrl),
+                              if (_showPlayerView && _youtubeController != null)
+                                YoutubePlayer(controller: _youtubeController!)
+                              else
+                                GestureDetector(
+                                  onTap: _showPlayer,
+                                  child: Stack(
+                                    fit: StackFit.expand,
+                                    children: [
+                                      if (_extractYouTubeId(_videoUrl) != null)
+                                        Image.network(
+                                          'https://img.youtube.com/vi/${_extractYouTubeId(_videoUrl)}/hqdefault.jpg',
+                                          fit: BoxFit.cover,
+                                          errorBuilder:
+                                              (_, __, ___) => Container(
+                                                color: Colors.black,
+                                              ),
+                                        )
+                                      else
+                                        Container(color: Colors.black),
+                                      const Center(
+                                        child: Icon(
+                                          Icons.play_circle_fill,
+                                          color: Colors.white,
+                                          size: 88,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                                initialSettings: InAppWebViewSettings(
-                                  javaScriptEnabled: true,
-                                  mediaPlaybackRequiresUserGesture: false,
-                                  allowsInlineMediaPlayback: true,
-                                  // استخدام User-Agent لمتصفح كروم ديسكتوب لتجاوز قيود يوتيوب موبايل
-                                  userAgent:
-                                      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-                                  useHybridComposition: true,
-                                  domStorageEnabled: true,
-                                  safeBrowsingEnabled: false,
-                                  mixedContentMode: MixedContentMode
-                                      .MIXED_CONTENT_ALWAYS_ALLOW,
-                                ),
-                                onWebViewCreated: (controller) {
-                                  _webViewController = controller;
-                                },
-                                onLoadStart: (controller, url) {
-                                  setState(() {
-                                    _isLoading = true;
-                                    _lastError = null;
-                                  });
-                                },
-                                onLoadStop: (controller, url) async {
-                                  setState(() {
-                                    _isLoading = false;
-                                  });
-                                },
-                                onReceivedError: (controller, request, error) {
-                                  setState(() {
-                                    _lastError = error.toString();
-                                    _isLoading = false;
-                                  });
-                                },
-                              ),
-                              if (_isLoading)
+                              if (_isLoading && _showPlayerView)
                                 Container(
                                   color: Colors.black.withValues(alpha: 0.55),
                                   child: const Center(
@@ -237,7 +243,7 @@ class _IntroVideoPageState extends State<IntroVideoPage>
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
                                         Text(
-                                          'WebView error:\n$_lastError',
+                                          '${lang.webViewErrorLabel}\n$_lastError',
                                           textAlign: TextAlign.center,
                                           style: const TextStyle(
                                             color: Colors.white,
@@ -247,7 +253,11 @@ class _IntroVideoPageState extends State<IntroVideoPage>
                                         const SizedBox(height: 12),
                                         ElevatedButton(
                                           onPressed: _openExternally,
-                                          child: const Text('Open in YouTube'),
+                                          child: Text(
+                                            AppLocalizations.of(
+                                              context,
+                                            )!.openInYouTube,
+                                          ),
                                         ),
                                       ],
                                     ),
@@ -262,7 +272,7 @@ class _IntroVideoPageState extends State<IntroVideoPage>
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
                                         Text(
-                                          'Invalid YouTube URL.\nيرجى التحقق من الرابط.',
+                                          lang.invalidYouTubeUrl,
                                           textAlign: TextAlign.center,
                                           style: const TextStyle(
                                             color: Colors.white,
@@ -272,7 +282,11 @@ class _IntroVideoPageState extends State<IntroVideoPage>
                                         const SizedBox(height: 12),
                                         ElevatedButton(
                                           onPressed: _openExternally,
-                                          child: const Text('Open source URL'),
+                                          child: Text(
+                                            AppLocalizations.of(
+                                              context,
+                                            )!.openSourceUrl,
+                                          ),
                                         ),
                                       ],
                                     ),
@@ -284,21 +298,19 @@ class _IntroVideoPageState extends State<IntroVideoPage>
                       ),
                     ),
                   ),
-
                   Positioned(
                     top: 12,
                     right: 12,
                     child: SlideTransition(
-                      position:
-                          Tween<Offset>(
-                            begin: const Offset(1, 0),
-                            end: Offset.zero,
-                          ).animate(
-                            CurvedAnimation(
-                              parent: _controller,
-                              curve: Curves.easeOut,
-                            ),
-                          ),
+                      position: Tween<Offset>(
+                        begin: const Offset(1, 0),
+                        end: Offset.zero,
+                      ).animate(
+                        CurvedAnimation(
+                          parent: _animationController,
+                          curve: Curves.easeOut,
+                        ),
+                      ),
                       child: Container(
                         decoration: BoxDecoration(
                           color: Colors.white,
@@ -322,8 +334,8 @@ class _IntroVideoPageState extends State<IntroVideoPage>
                               ),
                               child: Text(
                                 lang.back,
-                                style: TextStyle(
-                                  color: const Color(0xFF007AFF),
+                                style: const TextStyle(
+                                  color: Color(0xFF007AFF),
                                   fontWeight: FontWeight.w600,
                                   fontSize: 14,
                                 ),
@@ -334,22 +346,20 @@ class _IntroVideoPageState extends State<IntroVideoPage>
                       ),
                     ),
                   ),
-
                   Positioned(
                     bottom: 16,
                     left: 16,
                     right: 16,
                     child: SlideTransition(
-                      position:
-                          Tween<Offset>(
-                            begin: const Offset(0, 1),
-                            end: Offset.zero,
-                          ).animate(
-                            CurvedAnimation(
-                              parent: _controller,
-                              curve: Curves.easeOut,
-                            ),
-                          ),
+                      position: Tween<Offset>(
+                        begin: const Offset(0, 1),
+                        end: Offset.zero,
+                      ).animate(
+                        CurvedAnimation(
+                          parent: _animationController,
+                          curve: Curves.easeOut,
+                        ),
+                      ),
                       child: Container(
                         width: double.infinity,
                         height: 52,
@@ -362,9 +372,7 @@ class _IntroVideoPageState extends State<IntroVideoPage>
                           borderRadius: BorderRadius.circular(16),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(
-                                0xFF007AFF,
-                              ).withValues(alpha: 0.4),
+                              color: const Color(0xFF007AFF).withValues(alpha: 0.4),
                               blurRadius: 15,
                               offset: const Offset(0, 8),
                             ),
@@ -407,9 +415,8 @@ class _IntroVideoPageState extends State<IntroVideoPage>
                                 lang.getStarted,
                                 style: TextStyle(
                                   color: Colors.white,
-                                  fontSize: constraints.maxWidth < 360
-                                      ? 15
-                                      : 18,
+                                  fontSize:
+                                      constraints.maxWidth < 360 ? 15 : 18,
                                   fontWeight: FontWeight.w600,
                                   letterSpacing: 0.5,
                                 ),

@@ -11,9 +11,13 @@ import 'package:uniguide/features/welcome/welcome_animation_page.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  PushNotificationService.instance.initialize();
-
   runApp(const UniGuideApp());
+
+  // Delay heavy initialization until after the first frame to avoid blocking
+  // the UI thread during app startup on slower devices (reduces jank).
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    PushNotificationService.instance.initialize();
+  });
 }
 
 class UniGuideApp extends StatefulWidget {
@@ -40,8 +44,6 @@ class _UniGuideAppState extends State<UniGuideApp> {
   @override
   void initState() {
     super.initState();
-
-    PushNotificationService.instance.initialize();
     _loadThemePreference();
   }
 
@@ -117,10 +119,7 @@ class _UniGuideAppState extends State<UniGuideApp> {
         final mq = MediaQuery.of(context);
         return MediaQuery(
           data: mq.copyWith(
-            textScaler: mq.textScaler.clamp(
-              minScaleFactor: 0.85,
-              maxScaleFactor: 1.35,
-            ),
+            textScaleFactor: mq.textScaleFactor.clamp(0.85, 1.35) as double,
           ),
           child: child ?? const SizedBox.shrink(),
         );

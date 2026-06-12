@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:uniguide/core/content/student_guide_content.dart';
 import 'package:uniguide/features/guides/guide_detail_page.dart';
+import 'package:uniguide/l10n/app_localizations.dart';
 
 class SmartAssistantPage extends StatefulWidget {
   const SmartAssistantPage({super.key});
@@ -36,13 +37,11 @@ class _SmartAssistantPageState extends State<SmartAssistantPage> {
   @override
   Widget build(BuildContext context) {
     final locale = Localizations.localeOf(context);
-    final isArabic = locale.languageCode == 'ar';
+    final lang = AppLocalizations.of(context)!;
     final suggestions = StudentGuideContent.tasks(locale).take(3).toList();
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(isArabic ? 'المساعد الذكي' : 'Smart assistant'),
-      ),
+      appBar: AppBar(title: Text(lang.smartAssistantTitle)),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
         children: [
@@ -57,17 +56,11 @@ class _SmartAssistantPageState extends State<SmartAssistantPage> {
                   Icon(Icons.smart_toy_outlined, size: 42),
                   const SizedBox(height: 12),
                   Text(
-                    isArabic
-                        ? 'اسأل عن الإقامة، السكن، البنك، الجامعة أو المواصلات.'
-                        : 'Ask about residence, housing, banking, university, or transport.',
+                    lang.smartAssistantIntro,
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   const SizedBox(height: 12),
-                  Text(
-                    isArabic
-                        ? 'هذا مساعد إرشادي محلي يعتمد على محتوى التطبيق. اربطه لاحقاً بخدمة AI خلفية عند توفر سياسة خصوصية ومصدر معرفة رسمي.'
-                        : 'This is an on-device guidance assistant based on app content. Connect it later to a backend AI service with privacy controls and verified sources.',
-                  ),
+                  Text(lang.smartAssistantDescription),
                 ],
               ),
             ),
@@ -80,10 +73,10 @@ class _SmartAssistantPageState extends State<SmartAssistantPage> {
             textInputAction: TextInputAction.search,
             onSubmitted: (_) => _answer(),
             decoration: InputDecoration(
-              labelText: isArabic ? 'ما سؤالك؟' : 'What is your question?',
+              labelText: lang.smartAssistantQuestionLabel,
               border: const OutlineInputBorder(),
               suffixIcon: IconButton(
-                tooltip: isArabic ? 'بحث' : 'Search',
+                tooltip: lang.searchTooltip,
                 onPressed: _answer,
                 icon: const Icon(Icons.send),
               ),
@@ -91,7 +84,7 @@ class _SmartAssistantPageState extends State<SmartAssistantPage> {
           ),
           const SizedBox(height: 16),
           Text(
-            isArabic ? 'اقتراحات سريعة' : 'Quick suggestions',
+            lang.quickSuggestions,
             style: Theme.of(
               context,
             ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
@@ -115,7 +108,7 @@ class _SmartAssistantPageState extends State<SmartAssistantPage> {
           const SizedBox(height: 16),
           if (_matches.isNotEmpty)
             Text(
-              isArabic ? 'إجابات مقترحة' : 'Suggested answers',
+              lang.suggestedAnswers,
               style: Theme.of(
                 context,
               ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
