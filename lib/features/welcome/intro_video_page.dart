@@ -120,9 +120,8 @@ class _IntroVideoPageState extends State<IntroVideoPage>
     Navigator.pushReplacement(
       context,
       PageRouteBuilder(
-        pageBuilder:
-            (context, animation, secondaryAnimation) =>
-                const ProvinceSelectionPage(),
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            const ProvinceSelectionPage(),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           return FadeTransition(opacity: animation, child: child);
         },
@@ -151,11 +150,8 @@ class _IntroVideoPageState extends State<IntroVideoPage>
             builder: (context, constraints) {
               const topChrome = 72.0;
               const bottomChrome = 108.0;
-              final usableH =
-                  (constraints.maxHeight - topChrome - bottomChrome).clamp(
-                    160.0,
-                    double.infinity,
-                  );
+              final usableH = (constraints.maxHeight - topChrome - bottomChrome)
+                  .clamp(160.0, double.infinity);
               final maxW = constraints.maxWidth * 0.92;
               var boxW = maxW;
               var boxH = boxW * 9 / 16;
@@ -208,10 +204,8 @@ class _IntroVideoPageState extends State<IntroVideoPage>
                                         Image.network(
                                           'https://img.youtube.com/vi/${_extractYouTubeId(_videoUrl)}/hqdefault.jpg',
                                           fit: BoxFit.cover,
-                                          errorBuilder:
-                                              (_, __, ___) => Container(
-                                                color: Colors.black,
-                                              ),
+                                          errorBuilder: (_, _, _) =>
+                                              Container(color: Colors.black),
                                         )
                                       else
                                         Container(color: Colors.black),
@@ -302,15 +296,16 @@ class _IntroVideoPageState extends State<IntroVideoPage>
                     top: 12,
                     right: 12,
                     child: SlideTransition(
-                      position: Tween<Offset>(
-                        begin: const Offset(1, 0),
-                        end: Offset.zero,
-                      ).animate(
-                        CurvedAnimation(
-                          parent: _animationController,
-                          curve: Curves.easeOut,
-                        ),
-                      ),
+                      position:
+                          Tween<Offset>(
+                            begin: const Offset(1, 0),
+                            end: Offset.zero,
+                          ).animate(
+                            CurvedAnimation(
+                              parent: _animationController,
+                              curve: Curves.easeOut,
+                            ),
+                          ),
                       child: Container(
                         decoration: BoxDecoration(
                           color: Colors.white,
@@ -351,15 +346,16 @@ class _IntroVideoPageState extends State<IntroVideoPage>
                     left: 16,
                     right: 16,
                     child: SlideTransition(
-                      position: Tween<Offset>(
-                        begin: const Offset(0, 1),
-                        end: Offset.zero,
-                      ).animate(
-                        CurvedAnimation(
-                          parent: _animationController,
-                          curve: Curves.easeOut,
-                        ),
-                      ),
+                      position:
+                          Tween<Offset>(
+                            begin: const Offset(0, 1),
+                            end: Offset.zero,
+                          ).animate(
+                            CurvedAnimation(
+                              parent: _animationController,
+                              curve: Curves.easeOut,
+                            ),
+                          ),
                       child: Container(
                         width: double.infinity,
                         height: 52,
@@ -372,7 +368,9 @@ class _IntroVideoPageState extends State<IntroVideoPage>
                           borderRadius: BorderRadius.circular(16),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFF007AFF).withValues(alpha: 0.4),
+                              color: const Color(
+                                0xFF007AFF,
+                              ).withValues(alpha: 0.4),
                               blurRadius: 15,
                               offset: const Offset(0, 8),
                             ),
@@ -415,8 +413,9 @@ class _IntroVideoPageState extends State<IntroVideoPage>
                                 lang.getStarted,
                                 style: TextStyle(
                                   color: Colors.white,
-                                  fontSize:
-                                      constraints.maxWidth < 360 ? 15 : 18,
+                                  fontSize: constraints.maxWidth < 360
+                                      ? 15
+                                      : 18,
                                   fontWeight: FontWeight.w600,
                                   letterSpacing: 0.5,
                                 ),

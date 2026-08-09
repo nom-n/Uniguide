@@ -1,8 +1,10 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uniguide/core/constants/app_constants.dart';
+import 'package:uniguide/core/localization/ui_texts.dart';
 import 'package:uniguide/l10n/app_localizations.dart';
 import 'package:uniguide/main.dart';
+
 import 'province_selection_page.dart';
 import 'welcome_animation_page.dart';
 
@@ -15,19 +17,19 @@ class LanguageSelectionPage extends StatefulWidget {
 
 class _LanguageSelectionPageState extends State<LanguageSelectionPage>
     with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
+  late final AnimationController _controller;
   String? _selectedLanguage;
   bool _showLanguageBox = false;
 
-  final List<Map<String, String>> languages = [
-    {'name': 'Türkçe', 'code': 'tr', 'flag': '🇹🇷'},
-    {'name': 'English', 'code': 'en', 'flag': '🇺🇸'},
-    {'name': 'العربية', 'code': 'ar', 'flag': '🇸🇦'},
-    {'name': 'Français', 'code': 'fr', 'flag': '🇫🇷'},
-    {'name': 'Bahasa Indonesia', 'code': 'id', 'flag': '🇮🇩'},
-    {'name': 'اردو', 'code': 'ur', 'flag': '🇵🇰'},
-    {'name': 'Soomaali', 'code': 'so', 'flag': '🇸🇴'},
-    {'name': 'Қазақша', 'code': 'kk', 'flag': '🇰🇿'},
+  final List<Map<String, String>> languages = const [
+    {'code': 'tr', 'flag': '🇹🇷'},
+    {'code': 'en', 'flag': '🇺🇸'},
+    {'code': 'ar', 'flag': '🇸🇦'},
+    {'code': 'fr', 'flag': '🇫🇷'},
+    {'code': 'id', 'flag': '🇮🇩'},
+    {'code': 'ur', 'flag': '🇵🇰'},
+    {'code': 'so', 'flag': '🇸🇴'},
+    {'code': 'kk', 'flag': '🇰🇿'},
   ];
 
   @override
@@ -95,6 +97,7 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage>
     final isSmallScreen = screenSize.width < 600;
     final isMobile = screenSize.width < 400;
     final isTablet = screenSize.width >= 600 && screenSize.width < 1024;
+    final loc = AppLocalizations.of(context)!;
 
     return Scaffold(
       body: Container(
@@ -127,7 +130,7 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage>
                   fit: BoxFit.contain,
                 ),
                 const SizedBox(height: 14),
-                _buildTitle(isMobile, isSmallScreen),
+                _buildTitle(loc, isMobile, isSmallScreen),
                 SizedBox(height: _getSpacing(isMobile, isSmallScreen, isTablet)),
                 if (_showLanguageBox)
                   _buildLanguagesList(isMobile, isSmallScreen, isTablet)
@@ -230,8 +233,11 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage>
     );
   }
 
-  Widget _buildTitle(bool isMobile, bool isSmallScreen) {
-    final lang = AppLocalizations.of(context)!;
+  Widget _buildTitle(
+    AppLocalizations loc,
+    bool isMobile,
+    bool isSmallScreen,
+  ) {
     return SlideTransition(
       position: Tween<Offset>(
         begin: const Offset(0, -0.5),
@@ -243,7 +249,7 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage>
         ),
       ),
       child: Text(
-        lang.chooseLanguage,
+        loc.chooseLanguage,
         textAlign: TextAlign.center,
         style: TextStyle(
           color: Colors.grey.shade700,
@@ -256,143 +262,137 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage>
   }
 
   Widget _buildLanguagesList(
-      bool isMobile, bool isSmallScreen, bool isTablet) {
-    return Expanded(
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(24),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.1),
-              blurRadius: 20,
-              offset: const Offset(0, 10),
-            ),
-          ],
-        ),
-        child: SingleChildScrollView(
-          padding: EdgeInsets.symmetric(
-            vertical: isMobile ? 8 : 12,
-            horizontal: isMobile ? 8 : 12,
-          ),
-          child: Column(
-            children: List.generate(
-              languages.length,
-              (index) {
-                final lang = languages[index];
-                return _buildLanguageTile(
-                  lang['name']!,
-                  lang['code']!,
-                  lang['flag']!,
-                  isMobile,
-                  isSmallScreen,
-                  isTablet,
-                  index == languages.length - 1,
-                );
-              },
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildLanguageTile(
-    String title,
-    String code,
-    String flag,
     bool isMobile,
     bool isSmallScreen,
     bool isTablet,
-    bool isLast,
   ) {
-    final isSelected = _selectedLanguage == code;
+    return Expanded(
+      child: ListView.builder(
+        itemCount: languages.length,
+        physics: const BouncingScrollPhysics(),
+        itemBuilder: (context, index) {
+          final language = languages[index];
+          final code = language['code']!;
+          final flag = language['flag']!;
+          final name = UiTexts.languageName(context, code);
+          final isSelected = _selectedLanguage == code;
 
-    return Column(
-      children: [
-        Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: () => _selectLanguage(code),
-            borderRadius: BorderRadius.circular(12),
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                vertical: _getTileVerticalPadding(isMobile, isSmallScreen),
-                horizontal: _getTileHorizontalPadding(isMobile, isSmallScreen),
-              ),
-              child: Row(
-                children: [
-                  Text(
-                    flag,
-                    style: TextStyle(
-                      fontSize: _getFlagSize(isMobile, isSmallScreen),
+          return Padding(
+            padding: EdgeInsets.symmetric(
+              vertical: _getTileVerticalPadding(isMobile, isSmallScreen),
+            ),
+            child: FadeTransition(
+              opacity: _controller,
+              child: SlideTransition(
+                position: Tween<Offset>(
+                  begin: Offset(0, isTablet ? 0.2 : 0.3),
+                  end: Offset.zero,
+                ).animate(
+                  CurvedAnimation(
+                    parent: _controller,
+                    curve: Interval(
+                      index / languages.length,
+                      1.0,
+                      curve: Curves.easeOut,
                     ),
                   ),
-                  SizedBox(
-                      width: _getTileHorizontalPadding(isMobile, isSmallScreen)),
-                  Expanded(
-                    child: Text(
-                      title,
-                      style: TextStyle(
-                        fontSize: _getTileFontSize(isMobile, isSmallScreen),
-                        fontWeight: FontWeight.w600,
-                        color: Colors.grey.shade900,
+                ),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: isSelected
+                          ? const Color(0xFF007AFF)
+                          : Colors.grey.shade200,
+                      width: isSelected ? 2 : 1,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.05),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(16),
+                      onTap: () => _selectLanguage(code),
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: _getTileHorizontalPadding(
+                            isMobile,
+                            isSmallScreen,
+                          ),
+                          vertical: 14,
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: _getFlagSize(isMobile, isSmallScreen),
+                              height: _getFlagSize(isMobile, isSmallScreen),
+                              alignment: Alignment.center,
+                              child: Text(
+                                flag,
+                                style: TextStyle(
+                                  fontSize:
+                                      _getFlagSize(isMobile, isSmallScreen),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                name,
+                                style: TextStyle(
+                                  fontSize: _getTileFontSize(
+                                    isMobile,
+                                    isSmallScreen,
+                                  ),
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                            AnimatedContainer(
+                              duration: const Duration(milliseconds: 250),
+                              width: _getCheckboxSize(isMobile, isSmallScreen),
+                              height: _getCheckboxSize(isMobile, isSmallScreen),
+                              decoration: BoxDecoration(
+                                color: isSelected
+                                    ? const Color(0xFF007AFF)
+                                    : Colors.transparent,
+                                border: Border.all(
+                                  color: isSelected
+                                      ? const Color(0xFF007AFF)
+                                      : Colors.grey.shade400,
+                                  width: 2,
+                                ),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: isSelected
+                                  ? Icon(
+                                      Icons.check,
+                                      color: Colors.white,
+                                      size: _getCheckIconSize(
+                                        isMobile,
+                                        isSmallScreen,
+                                      ),
+                                    )
+                                  : null,
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                  _buildSelectionIndicator(isSelected, isMobile, isSmallScreen),
-                ],
+                ),
               ),
             ),
-          ),
-        ),
-        if (!isLast)
-          Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: _getTileHorizontalPadding(isMobile, isSmallScreen),
-            ),
-            child: Divider(
-              height: 1,
-              color: Colors.grey.shade200,
-            ),
-          ),
-      ],
+          );
+        },
+      ),
     );
-  }
-
-  Widget _buildSelectionIndicator(
-    bool isSelected,
-    bool isMobile,
-    bool isSmallScreen,
-  ) {
-    final size = _getCheckboxSize(isMobile, isSmallScreen);
-    final checkSize = _getCheckIconSize(isMobile, isSmallScreen);
-
-    if (isSelected) {
-      return Container(
-        padding: const EdgeInsets.all(4),
-        decoration: const BoxDecoration(
-          shape: BoxShape.circle,
-          color: Color(0xFF007AFF),
-        ),
-        child: Icon(
-          Icons.check,
-          color: Colors.white,
-          size: checkSize,
-        ),
-      );
-    } else {
-      return Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          border: Border.all(
-            color: Colors.grey.shade300,
-            width: 2,
-          ),
-        ),
-      );
-    }
   }
 }

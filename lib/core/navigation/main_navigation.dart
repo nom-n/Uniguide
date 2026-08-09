@@ -27,31 +27,33 @@ class _MainNavigationState extends State<MainNavigation> {
     final lang = AppLocalizations.of(context)!;
 
     return Scaffold(
-      body: pages[currentIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: currentIndex,
-        onTap: (index) {
+      body: IndexedStack(index: currentIndex, children: pages),
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: currentIndex,
+        onDestinationSelected: (index) {
           setState(() {
             currentIndex = index;
           });
         },
-        selectedItemColor: const Color(0xFF007AFF),
-        unselectedItemColor: Colors.grey,
-        items: [
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.home),
+        destinations: [
+          NavigationDestination(
+            icon: const Icon(Icons.home_outlined),
+            selectedIcon: const Icon(Icons.home),
             label: lang.home,
           ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.check_circle),
+          NavigationDestination(
+            icon: const Icon(Icons.check_circle_outline),
+            selectedIcon: const Icon(Icons.check_circle),
             label: lang.tasks,
           ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.menu_book),
+          NavigationDestination(
+            icon: const Icon(Icons.menu_book_outlined),
+            selectedIcon: const Icon(Icons.menu_book),
             label: lang.guides,
           ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.person),
+          NavigationDestination(
+            icon: const Icon(Icons.person_outline),
+            selectedIcon: const Icon(Icons.person),
             label: lang.profile,
           ),
         ],

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:uniguide/l10n/app_localizations.dart';
+import 'package:uniguide/core/content/content_repository.dart';
 
 enum GuideCategory {
   preArrival,
@@ -109,6 +110,8 @@ class StudentGuideContent {
   const StudentGuideContent._();
 
   static List<GuideArticle> articles(Locale locale) {
+    final remote = _remoteArticles(locale.languageCode);
+    if (remote != null) return remote;
     switch (locale.languageCode) {
       case 'ar':
         return _arabicArticles;
@@ -130,6 +133,8 @@ class StudentGuideContent {
   }
 
   static List<StudentTask> tasks(Locale locale) {
+    final remote = _remoteTasks(locale.languageCode);
+    if (remote != null) return remote;
     switch (locale.languageCode) {
       case 'ar':
         return _arabicTasks;
@@ -151,6 +156,8 @@ class StudentGuideContent {
   }
 
   static List<ImportantPlace> places(Locale locale) {
+    final remote = _remotePlaces(locale.languageCode);
+    if (remote != null) return remote;
     switch (locale.languageCode) {
       case 'ar':
         return _arabicPlaces;
@@ -208,6 +215,105 @@ class StudentGuideContent {
       if (article.category == nextCategory) return article;
     }
     return articles(locale).first;
+  }
+
+  static List<GuideArticle>? _remoteArticles(String localeCode) {
+    final raw = ContentRepository.instance.guides(localeCode);
+    if (raw == null || raw.isEmpty) return null;
+    return raw.map(_guideFromRemote).toList();
+  }
+
+  static List<StudentTask>? _remoteTasks(String localeCode) {
+    final raw = ContentRepository.instance.tasks(localeCode);
+    if (raw == null || raw.isEmpty) return null;
+    return raw.map(_taskFromRemote).toList();
+  }
+
+  static List<ImportantPlace>? _remotePlaces(String localeCode) {
+    final raw = ContentRepository.instance.places(localeCode);
+    if (raw == null || raw.isEmpty) return null;
+    return raw.map(_placeFromRemote).toList();
+  }
+}
+
+GuideArticle _guideFromRemote(Map<String, dynamic> json) {
+  return GuideArticle(
+    id: json['id']?.toString() ?? '',
+    category: _categoryFromRemote(json['category']?.toString()),
+    icon: IconData(0xE3E8),
+    title: json['title']?.toString() ?? '',
+    summary: json['summary']?.toString() ?? '',
+    steps: [
+      for (final step in (json['steps'] as List<dynamic>? ?? const []))
+        GuideStep(
+          title: (step as Map<String, dynamic>)['title']?.toString() ?? '',
+          details: step['details']?.toString() ?? '',
+          requiredDocuments: [
+            for (final item
+                in (step['requiredDocuments'] as List<dynamic>? ?? const []))
+              item.toString(),
+          ],
+          warnings: [
+            for (final item in (step['warnings'] as List<dynamic>? ?? const []))
+              item.toString(),
+          ],
+          links: [
+            for (final link in (step['links'] as List<dynamic>? ?? const []))
+              GuideLink(
+                label:
+                    (link as Map<String, dynamic>)['label']?.toString() ?? '',
+                url: link['url']?.toString() ?? '',
+              ),
+          ],
+        ),
+    ],
+    tags: [
+      for (final item in (json['tags'] as List<dynamic>? ?? const []))
+        item.toString(),
+    ],
+  );
+}
+
+StudentTask _taskFromRemote(Map<String, dynamic> json) {
+  return StudentTask(
+    id: json['id']?.toString() ?? '',
+    title: json['title']?.toString() ?? '',
+    description: json['description']?.toString() ?? '',
+    category: _categoryFromRemote(json['category']?.toString()),
+    priority: int.tryParse(json['priority']?.toString() ?? '') ?? 3,
+  );
+}
+
+ImportantPlace _placeFromRemote(Map<String, dynamic> json) {
+  return ImportantPlace(
+    name: json['name']?.toString() ?? '',
+    type: json['type']?.toString() ?? '',
+    city: json['city']?.toString() ?? '',
+    description: json['description']?.toString() ?? '',
+    url: json['url']?.toString() ?? '',
+  );
+}
+
+GuideCategory _categoryFromRemote(String? value) {
+  switch (value) {
+    case 'preArrival':
+      return GuideCategory.preArrival;
+    case 'afterArrival':
+      return GuideCategory.afterArrival;
+    case 'banking':
+      return GuideCategory.banking;
+    case 'housing':
+      return GuideCategory.housing;
+    case 'universityLife':
+      return GuideCategory.universityLife;
+    case 'transport':
+      return GuideCategory.transport;
+    case 'studentTips':
+      return GuideCategory.studentTips;
+    case 'maps':
+      return GuideCategory.maps;
+    default:
+      return GuideCategory.afterArrival;
   }
 }
 
@@ -825,12 +931,12 @@ const _turkishArticles = [
     steps: [
       GuideStep(
         title: 'Vergi numarası alın',
-        details: 'Bankacılık ve ikamet işlemleri için buna ihtiyacınız olabilir.',
+        details:
+            'Bankacılık ve ikamet işlemleri için buna ihtiyacınız olabilir.',
       ),
       GuideStep(
         title: 'Üniversite kaydını tamamlayın',
-        details:
-            'Üniversite kaydınız aktif olur olmaz öğrenci belgenizi alın.',
+        details: 'Üniversite kaydınız aktif olur olmaz öğrenci belgenizi alın.',
       ),
       GuideStep(
         title: 'İkamet randevusu alın',
@@ -844,7 +950,8 @@ const _turkishArticles = [
     category: GuideCategory.banking,
     icon: Icons.account_balance,
     title: 'Öğrenci bankacılığı',
-    summary: 'Nasıl hesap açılır ve öğrenci dostu bankalar nasıl karşılaştırılır.',
+    summary:
+        'Nasıl hesap açılır ve öğrenci dostu bankalar nasıl karşılaştırılır.',
     tags: ['banka', 'hesap', 'IBAN'],
     steps: [
       GuideStep(
@@ -988,7 +1095,8 @@ const _turkishTasks = [
   StudentTask(
     id: 'tax',
     title: 'Vergi numarası al',
-    description: 'Bankacılık ve evrak işleri için gerekli olduğu için buradan başlayın.',
+    description:
+        'Bankacılık ve evrak işleri için gerekli olduğu için buradan başlayın.',
     category: GuideCategory.afterArrival,
     priority: 1,
   ),
@@ -1016,7 +1124,8 @@ const _turkishTasks = [
   StudentTask(
     id: 'bank',
     title: 'Banka hesabı aç',
-    description: 'Bankaları karşılaştırın ve vergi numarası ile telefon numarasını getirin.',
+    description:
+        'Bankaları karşılaştırın ve vergi numarası ile telefon numarasını getirin.',
     category: GuideCategory.banking,
     priority: 5,
   ),
@@ -1098,7 +1207,8 @@ const _frenchArticles = [
     steps: [
       GuideStep(
         title: 'Obtenez un numéro fiscal',
-        details: 'Vous en aurez besoin pour les procédures bancaires et de résidence.',
+        details:
+            'Vous en aurez besoin pour les procédures bancaires et de résidence.',
       ),
       GuideStep(
         title: 'Terminez l\'inscription universitaire',
@@ -1117,7 +1227,8 @@ const _frenchArticles = [
     category: GuideCategory.banking,
     icon: Icons.account_balance,
     title: 'Services bancaires pour étudiants',
-    summary: 'Comment ouvrir un compte et comparer les banques adaptées aux étudiants.',
+    summary:
+        'Comment ouvrir un compte et comparer les banques adaptées aux étudiants.',
     tags: ['banque', 'compte', 'IBAN'],
     steps: [
       GuideStep(
@@ -1132,7 +1243,8 @@ const _frenchArticles = [
       ),
       GuideStep(
         title: 'Protégez l\'accès',
-        details: 'Ne partagez jamais vos mots de passe bancaires ou vos codes SMS.',
+        details:
+            'Ne partagez jamais vos mots de passe bancaires ou vos codes SMS.',
       ),
     ],
   ),
@@ -1225,7 +1337,8 @@ const _frenchArticles = [
       ),
       GuideStep(
         title: 'Apprenez le turc quotidiennement',
-        details: 'Commencez par des phrases pour le service, le transport et le campus.',
+        details:
+            'Commencez par des phrases pour le service, le transport et le campus.',
       ),
       GuideStep(
         title: 'Évitez les erreurs de débutant',
@@ -1261,21 +1374,24 @@ const _frenchTasks = [
   StudentTask(
     id: 'tax',
     title: 'Obtenir un numéro fiscal',
-    description: 'Commencez ici car il est nécessaire pour les services bancaires et la paperasse.',
+    description:
+        'Commencez ici car il est nécessaire pour les services bancaires et la paperasse.',
     category: GuideCategory.afterArrival,
     priority: 1,
   ),
   StudentTask(
     id: 'university-registration',
     title: 'Terminer l\'inscription universitaire',
-    description: 'Obtenez votre certificat d\'étudiant pour la résidence et le transport.',
+    description:
+        'Obtenez votre certificat d\'étudiant pour la résidence et le transport.',
     category: GuideCategory.universityLife,
     priority: 2,
   ),
   StudentTask(
     id: 'insurance',
     title: 'Préparer l\'assurance maladie',
-    description: 'Assurez-vous qu\'elle est valide pour les procédures de résidence.',
+    description:
+        'Assurez-vous qu\'elle est valide pour les procédures de résidence.',
     category: GuideCategory.afterArrival,
     priority: 3,
   ),
@@ -1289,7 +1405,8 @@ const _frenchTasks = [
   StudentTask(
     id: 'bank',
     title: 'Ouvrir un compte bancaire',
-    description: 'Comparez les banques et apportez le numéro fiscal et le numéro de téléphone.',
+    description:
+        'Comparez les banques et apportez le numéro fiscal et le numéro de téléphone.',
     category: GuideCategory.banking,
     priority: 5,
   ),
@@ -1328,7 +1445,8 @@ const _frenchPlaces = [
     name: 'Agence bancaire à proximité',
     type: 'Banque',
     city: 'Toutes les villes',
-    description: 'Ouverture de compte, espèces et services bancaires aux étudiants.',
+    description:
+        'Ouverture de compte, espèces et services bancaires aux étudiants.',
     url: 'https://maps.google.com/?q=Banka',
   ),
 ];
@@ -1371,7 +1489,8 @@ const _indonesianArticles = [
     steps: [
       GuideStep(
         title: 'Dapatkan nomor pajak',
-        details: 'Anda mungkin membutuhkannya untuk prosedur perbankan dan izin tinggal.',
+        details:
+            'Anda mungkin membutuhkannya untuk prosedur perbankan dan izin tinggal.',
       ),
       GuideStep(
         title: 'Selesaikan pendaftaran universitas',
@@ -1390,7 +1509,8 @@ const _indonesianArticles = [
     category: GuideCategory.banking,
     icon: Icons.account_balance,
     title: 'Perbankan mahasiswa',
-    summary: 'Cara membuka rekening dan membandingkan bank yang ramah mahasiswa.',
+    summary:
+        'Cara membuka rekening dan membandingkan bank yang ramah mahasiswa.',
     tags: ['bank', 'rekening', 'IBAN'],
     steps: [
       GuideStep(
@@ -1466,8 +1586,7 @@ const _indonesianArticles = [
     category: GuideCategory.transport,
     icon: Icons.directions_bus,
     title: 'Transportasi dan diskon mahasiswa',
-    summary:
-        'Metro, bus, trem, kartu kota, dan diskon transportasi mahasiswa.',
+    summary: 'Metro, bus, trem, kartu kota, dan diskon transportasi mahasiswa.',
     tags: ['metro', 'bus', 'trem', 'kartu mahasiswa'],
     steps: [
       GuideStep(
@@ -1541,7 +1660,8 @@ const _indonesianTasks = [
   StudentTask(
     id: 'university-registration',
     title: 'Selesaikan pendaftaran universitas',
-    description: 'Dapatkan sertifikat mahasiswa untuk izin tinggal dan transportasi.',
+    description:
+        'Dapatkan sertifikat mahasiswa untuk izin tinggal dan transportasi.',
     category: GuideCategory.universityLife,
     priority: 2,
   ),
@@ -1601,7 +1721,8 @@ const _indonesianPlaces = [
     name: 'Cabang bank terdekat',
     type: 'Perbankan',
     city: 'Semua kota',
-    description: 'Pembukaan rekening, uang tunai, dan layanan perbankan mahasiswa.',
+    description:
+        'Pembukaan rekening, uang tunai, dan layanan perbankan mahasiswa.',
     url: 'https://maps.google.com/?q=Banka',
   ),
 ];
@@ -1644,7 +1765,8 @@ const _kazakhArticles = [
     steps: [
       GuideStep(
         title: 'Салық нөмірін алыңыз',
-        details: 'Бұл сізге банктік және тұруға рұқсат алу процедуралары үшін қажет болуы мүмкін.',
+        details:
+            'Бұл сізге банктік және тұруға рұқсат алу процедуралары үшін қажет болуы мүмкін.',
       ),
       GuideStep(
         title: 'Университетке тіркелуді аяқтаңыз',
@@ -1663,7 +1785,8 @@ const _kazakhArticles = [
     category: GuideCategory.banking,
     icon: Icons.account_balance,
     title: 'Студенттік банкинг',
-    summary: 'Шотты қалай ашуға болады және студенттерге қолайлы банктерді қалай салыстыруға болады.',
+    summary:
+        'Шотты қалай ашуға болады және студенттерге қолайлы банктерді қалай салыстыруға болады.',
     tags: ['банк', 'шот', 'IBAN'],
     steps: [
       GuideStep(
@@ -1678,7 +1801,8 @@ const _kazakhArticles = [
       ),
       GuideStep(
         title: 'Қолжетімділікті қорғаңыз',
-        details: 'Банктік құпия сөздерді немесе SMS кодтарын ешқашан бөліспеңіз.',
+        details:
+            'Банктік құпия сөздерді немесе SMS кодтарын ешқашан бөліспеңіз.',
       ),
     ],
   ),
@@ -1821,7 +1945,8 @@ const _kazakhTasks = [
   StudentTask(
     id: 'insurance',
     title: 'Медициналық сақтандыруды дайындаңыз',
-    description: 'Оның тұруға рұқсат алу процедуралары үшін жарамды екеніне көз жеткізіңіз.',
+    description:
+        'Оның тұруға рұқсат алу процедуралары үшін жарамды екеніне көз жеткізіңіз.',
     category: GuideCategory.afterArrival,
     priority: 3,
   ),
@@ -1835,7 +1960,8 @@ const _kazakhTasks = [
   StudentTask(
     id: 'bank',
     title: 'Банк шотын ашыңыз',
-    description: 'Банктерді салыстырыңыз және салық нөмірі мен телефон нөмірін әкеліңіз.',
+    description:
+        'Банктерді салыстырыңыз және салық нөмірі мен телефон нөмірін әкеліңіз.',
     category: GuideCategory.banking,
     priority: 5,
   ),
@@ -1874,7 +2000,8 @@ const _kazakhPlaces = [
     name: 'Жақын маңдағы банк бөлімшесі',
     type: 'Банкинг',
     city: 'Барлық қалалар',
-    description: 'Шот ашу, қолма-қол ақша және студенттерге банктік қызмет көрсету.',
+    description:
+        'Шот ашу, қолма-қол ақша және студенттерге банктік қызмет көрсету.',
     url: 'https://maps.google.com/?q=Banka',
   ),
 ];
@@ -1917,7 +2044,8 @@ const _somaliArticles = [
     steps: [
       GuideStep(
         title: 'Qaado lambarka cashuurta',
-        details: 'Waxaad u baahan kartaa adeegyada bangiga iyo habraaca deganaanshaha.',
+        details:
+            'Waxaad u baahan kartaa adeegyada bangiga iyo habraaca deganaanshaha.',
       ),
       GuideStep(
         title: 'Dhameystir diiwaangelinta jaamacadda',
@@ -1936,7 +2064,8 @@ const _somaliArticles = [
     category: GuideCategory.banking,
     icon: Icons.account_balance,
     title: 'Adeegyada bangiga ee ardayda',
-    summary: 'Sida loo furo xisaab bangi iyo isbarbardhigga bangiyada u roon ardayda.',
+    summary:
+        'Sida loo furo xisaab bangi iyo isbarbardhigga bangiyada u roon ardayda.',
     tags: ['bangiga', 'xisaab', 'IBAN'],
     steps: [
       GuideStep(
@@ -1951,7 +2080,8 @@ const _somaliArticles = [
       ),
       GuideStep(
         title: 'Ilaali gelitaanka',
-        details: 'Weligaa ha la wadaagin furayaasha bangiga ama koodhadhka SMS-ka.',
+        details:
+            'Weligaa ha la wadaagin furayaasha bangiga ama koodhadhka SMS-ka.',
       ),
     ],
   ),
@@ -2080,7 +2210,8 @@ const _somaliTasks = [
   StudentTask(
     id: 'tax',
     title: 'Qaado lambarka cashuurta',
-    description: 'Halkan ka billow waayo waxaa loo baahan yahay adeegyada bangiga iyo waraaqaha.',
+    description:
+        'Halkan ka billow waayo waxaa loo baahan yahay adeegyada bangiga iyo waraaqaha.',
     category: GuideCategory.afterArrival,
     priority: 1,
   ),
@@ -2108,14 +2239,16 @@ const _somaliTasks = [
   StudentTask(
     id: 'bank',
     title: 'Furo xisaab bangi',
-    description: 'Isbarbardhig bangiyada oo keen lambarka cashuurta iyo lambarka taleefanka.',
+    description:
+        'Isbarbardhig bangiyada oo keen lambarka cashuurta iyo lambarka taleefanka.',
     category: GuideCategory.banking,
     priority: 5,
   ),
   StudentTask(
     id: 'transport-card',
     title: 'Qaado kaarka gaadiidka',
-    description: 'Isticmaal shahaadadaada ardaynimada si aad u hesho qiimo dhimis.',
+    description:
+        'Isticmaal shahaadadaada ardaynimada si aad u hesho qiimo dhimis.',
     category: GuideCategory.transport,
     priority: 6,
   ),
@@ -2147,7 +2280,8 @@ const _somaliPlaces = [
     name: 'Laanta bangiga ee u dhow',
     type: 'Adeegyada Bangiga',
     city: 'Magaalooyinka oo dhan',
-    description: 'Furitaanka xisaabta, lacag cadaan ah, iyo adeegyada bangiga ee ardayda.',
+    description:
+        'Furitaanka xisaabta, lacag cadaan ah, iyo adeegyada bangiga ee ardayda.',
     url: 'https://maps.google.com/?q=Banka',
   ),
 ];
@@ -2190,7 +2324,8 @@ const _urduArticles = [
     steps: [
       GuideStep(
         title: 'ٹیکس نمبر حاصل کریں',
-        details: 'آپ کو بینکنگ اور رہائشی طریقہ کار کے لیے اس کی ضرورت پڑ سکتی ہے۔',
+        details:
+            'آپ کو بینکنگ اور رہائشی طریقہ کار کے لیے اس کی ضرورت پڑ سکتی ہے۔',
       ),
       GuideStep(
         title: 'یونیورسٹی کی رجسٹریشن مکمل کریں',
@@ -2209,7 +2344,8 @@ const _urduArticles = [
     category: GuideCategory.banking,
     icon: Icons.account_balance,
     title: 'طلباء کے لیے بینکنگ',
-    summary: 'اکاؤنٹ کیسے کھولا جائے اور طلباء کے لیے موزوں بینکوں کا موازنہ کیسے کیا جائے۔',
+    summary:
+        'اکاؤنٹ کیسے کھولا جائے اور طلباء کے لیے موزوں بینکوں کا موازنہ کیسے کیا جائے۔',
     tags: ['بینک', 'اکاؤنٹ', 'آئی بی اے این'],
     steps: [
       GuideStep(
@@ -2285,8 +2421,7 @@ const _urduArticles = [
     category: GuideCategory.transport,
     icon: Icons.directions_bus,
     title: 'ٹرانسپورٹ اور طلباء کے لیے رعایتیں',
-    summary:
-        'میٹرو، بسیں، ٹرام، سٹی کارڈز، اور طلباء کے لیے سفری رعایتیں۔',
+    summary: 'میٹرو، بسیں، ٹرام، سٹی کارڈز، اور طلباء کے لیے سفری رعایتیں۔',
     tags: ['میٹرو', 'بس', 'ٹرام', 'اسٹوڈنٹ کارڈ'],
     steps: [
       GuideStep(
@@ -2306,8 +2441,7 @@ const _urduArticles = [
     category: GuideCategory.studentTips,
     icon: Icons.psychology_alt,
     title: 'مطالعہ اور مطابقت کے مشورے',
-    summary:
-        'وقت کا انتظام، ترکی زبان سیکھنا، تعلیمی کامیابی، اور عام غلطیاں۔',
+    summary: 'وقت کا انتظام، ترکی زبان سیکھنا، تعلیمی کامیابی، اور عام غلطیاں۔',
     tags: ['ترکی', 'وقت', 'کامیابی'],
     steps: [
       GuideStep(
@@ -2353,7 +2487,8 @@ const _urduTasks = [
   StudentTask(
     id: 'tax',
     title: 'ٹیکس نمبر حاصل کریں',
-    description: 'یہاں سے شروع کریں کیونکہ یہ بینکنگ اور کاغذی کارروائی کے لیے ضروری ہے۔',
+    description:
+        'یہاں سے شروع کریں کیونکہ یہ بینکنگ اور کاغذی کارروائی کے لیے ضروری ہے۔',
     category: GuideCategory.afterArrival,
     priority: 1,
   ),
@@ -2367,7 +2502,8 @@ const _urduTasks = [
   StudentTask(
     id: 'insurance',
     title: 'ہیلتھ انشورنس تیار کریں',
-    description: 'اس بات کو یقینی بنائیں کہ یہ رہائشی طریقہ کار کے لیے موزوں ہے۔',
+    description:
+        'اس بات کو یقینی بنائیں کہ یہ رہائشی طریقہ کار کے لیے موزوں ہے۔',
     category: GuideCategory.afterArrival,
     priority: 3,
   ),

@@ -24,6 +24,7 @@ import {
   ResetPasswordDto,
   SendEmailOtpDto,
   SocialLoginDto,
+  UpdateProfileDto,
   UpsertFcmTokenDto,
   VerifyEmailDto,
 } from './dto/auth.dto';
@@ -181,6 +182,43 @@ export class AuthService {
       throw new UnauthorizedException('User not found.');
     }
     return { user: this.toSafeUser(user) };
+  }
+
+  async updateProfile(userId: string, dto: UpdateProfileDto) {
+    const user = await this.usersRepo.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new UnauthorizedException('User not found.');
+    }
+
+    if (dto.firstName !== undefined) {
+      user.firstName = dto.firstName.trim() || null;
+    }
+    if (dto.lastName !== undefined) {
+      user.lastName = dto.lastName.trim() || null;
+    }
+    if (dto.displayName !== undefined) {
+      user.displayName = dto.displayName.trim() || null;
+    }
+    if (dto.profileEmoji !== undefined) {
+      user.profileEmoji = dto.profileEmoji.trim() || null;
+    }
+    if (dto.gender !== undefined) {
+      user.gender = dto.gender.trim() || null;
+    }
+    if (dto.birthYear !== undefined) {
+      user.birthYear = dto.birthYear;
+    }
+
+    if (dto.displayName === undefined) {
+      const fullName = [user.firstName, user.lastName]
+        .filter((part): part is string => Boolean(part))
+        .join(' ')
+        .trim();
+      user.displayName = fullName || user.displayName || user.email.split('@')[0];
+    }
+
+    const saved = await this.usersRepo.save(user);
+    return { user: this.toSafeUser(saved) };
   }
 
   async sendVerificationEmail(userId: string) {

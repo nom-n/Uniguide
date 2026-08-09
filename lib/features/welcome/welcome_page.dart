@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:uniguide/core/localization/ui_texts.dart';
+import 'package:uniguide/l10n/app_localizations.dart';
+
 import 'language_selection_page.dart';
 
 class WelcomePage extends StatefulWidget {
@@ -10,8 +13,8 @@ class WelcomePage extends StatefulWidget {
 
 class _WelcomePageState extends State<WelcomePage>
     with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _fadeAnimation;
+  late final AnimationController _controller;
+  late final Animation<double> _fadeAnimation;
   bool _showNextButton = false;
 
   @override
@@ -21,15 +24,11 @@ class _WelcomePageState extends State<WelcomePage>
       duration: const Duration(milliseconds: 1000),
       vsync: this,
     );
-
-    _fadeAnimation = Tween<double>(
-      begin: 0,
-      end: 1,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeIn));
-
+    _fadeAnimation = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeIn),
+    );
     _controller.forward();
 
-    // إظهار زر Next بعد ثانيتين
     Future.delayed(const Duration(seconds: 2), () {
       if (mounted) {
         setState(() => _showNextButton = true);
@@ -45,6 +44,7 @@ class _WelcomePageState extends State<WelcomePage>
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     return Scaffold(
       body: Container(
         width: double.infinity,
@@ -62,22 +62,27 @@ class _WelcomePageState extends State<WelcomePage>
               Center(
                 child: FadeTransition(
                   opacity: _fadeAnimation,
-                  child: const Column(
+                  child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        "Welcome to UniGuide",
-                        style: TextStyle(
+                        loc.welcome,
+                        style: const TextStyle(
                           color: Colors.white,
                           fontSize: 32,
                           fontWeight: FontWeight.bold,
                         ),
                         textAlign: TextAlign.center,
                       ),
-                      SizedBox(height: 20),
+                      const SizedBox(height: 20),
                       Text(
-                        "Your guide to university life",
-                        style: TextStyle(color: Colors.white70, fontSize: 18),
+                        UiTexts.text(
+                          context,
+                          en: 'Your guide to university life',
+                          ar: 'دليلك إلى الحياة الجامعية',
+                        ),
+                        style:
+                            const TextStyle(color: Colors.white70, fontSize: 18),
                         textAlign: TextAlign.center,
                       ),
                     ],
@@ -113,9 +118,9 @@ class _WelcomePageState extends State<WelcomePage>
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: const Text(
-                        "Next",
-                        style: TextStyle(
+                      child: Text(
+                        loc.next,
+                        style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w600,
                         ),

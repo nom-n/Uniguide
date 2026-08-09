@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uniguide/core/constants/app_constants.dart';
+import 'package:uniguide/core/localization/ui_texts.dart';
+import 'package:uniguide/features/admin/admin_console_page.dart';
 import 'package:uniguide/l10n/app_localizations.dart';
 import 'package:uniguide/main.dart';
 
@@ -15,16 +17,16 @@ class _SettingsPageState extends State<SettingsPage> {
   String _langCode = 'en';
   ThemeMode _themeMode = ThemeMode.system;
 
-  final Map<String, String> _languageNames = {
-    'tr': 'Türkçe',
-    'en': 'English',
-    'ar': 'العربية',
-    'fr': 'Français',
-    'id': 'Bahasa Indonesia',
-    'ur': 'اردو',
-    'so': 'Soomaali',
-    'kk': 'Қазақша',
-  };
+  static const List<String> _supportedLanguages = [
+    'tr',
+    'en',
+    'ar',
+    'fr',
+    'id',
+    'ur',
+    'so',
+    'kk',
+  ];
 
   @override
   void initState() {
@@ -36,13 +38,14 @@ class _SettingsPageState extends State<SettingsPage> {
     final prefs = await SharedPreferences.getInstance();
     final code = prefs.getString(AppConstants.kPrefsLangKey);
     final tcode = prefs.getString(AppConstants.kPrefsThemeModeKey);
+    if (!mounted) return;
     setState(() {
       _langCode = code ?? _langCode;
       _themeMode = tcode == 'light'
           ? ThemeMode.light
           : tcode == 'dark'
-          ? ThemeMode.dark
-          : ThemeMode.system;
+              ? ThemeMode.dark
+              : ThemeMode.system;
     });
   }
 
@@ -59,8 +62,8 @@ class _SettingsPageState extends State<SettingsPage> {
     final code = mode == ThemeMode.light
         ? 'light'
         : mode == ThemeMode.dark
-        ? 'dark'
-        : 'system';
+            ? 'dark'
+            : 'system';
     await prefs.setString(AppConstants.kPrefsThemeModeKey, code);
     if (!mounted) return;
     setState(() => _themeMode = mode);
@@ -79,16 +82,16 @@ class _SettingsPageState extends State<SettingsPage> {
             child: ListTile(
               leading: const Icon(Icons.language),
               title: Text(loc.chooseLanguage),
-              subtitle: Text(_languageNames[_langCode] ?? _langCode),
+              subtitle: Text(UiTexts.languageName(context, _langCode)),
               trailing: DropdownButton<String>(
                 value: _langCode,
-                onChanged: (v) {
-                  if (v != null) _setLanguage(v);
+                onChanged: (value) {
+                  if (value != null) _setLanguage(value);
                 },
-                items: _languageNames.keys.map((code) {
-                  return DropdownMenuItem(
+                items: _supportedLanguages.map((code) {
+                  return DropdownMenuItem<String>(
                     value: code,
-                    child: Text(_languageNames[code]!),
+                    child: Text(UiTexts.languageName(context, code)),
                   );
                 }).toList(),
               ),
@@ -103,13 +106,13 @@ class _SettingsPageState extends State<SettingsPage> {
                 _themeMode == ThemeMode.system
                     ? loc.themeModeSystem
                     : _themeMode == ThemeMode.light
-                    ? loc.themeModeLight
-                    : loc.themeModeDark,
+                        ? loc.themeModeLight
+                        : loc.themeModeDark,
               ),
               trailing: DropdownButton<ThemeMode>(
                 value: _themeMode,
-                onChanged: (v) {
-                  if (v != null) _setTheme(v);
+                onChanged: (value) {
+                  if (value != null) _setTheme(value);
                 },
                 items: [
                   DropdownMenuItem(
@@ -128,8 +131,36 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
             ),
           ),
+          const SizedBox(height: 12),
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.admin_panel_settings_outlined),
+              title: Text(_text(context, en: 'Admin console', ar: 'لوحة الإدارة')),
+              subtitle: Text(
+                _text(
+                  context,
+                  en: 'Manage guides, tasks, places, and notification campaigns.',
+                  ar: 'إدارة الأدلة والمهام والأماكن وحملات الإشعارات.',
+                ),
+              ),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const AdminConsolePage()),
+                );
+              },
+            ),
+          ),
         ],
       ),
     );
   }
+}
+
+String _text(
+  BuildContext context, {
+  required String en,
+  required String ar,
+}) {
+  return Localizations.localeOf(context).languageCode == 'ar' ? ar : en;
 }

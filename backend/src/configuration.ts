@@ -15,6 +15,8 @@ export default () => {
   const smtpPort = Number(process.env.SMTP_PORT ?? 587);
   const smtpUser = process.env.SMTP_USER ?? '';
   const smtpPass = process.env.SMTP_PASS ?? '';
+  const adminApiKey =
+    process.env.ADMIN_API_KEY ?? (env === 'production' ? '' : 'dev-admin-key');
 
   if (env === 'production') {
     if (!databaseUrl) {
@@ -25,6 +27,9 @@ export default () => {
     }
     if (!smtpHost || !smtpUser || !smtpPass) {
       throw new Error('SMTP settings are required in production.');
+    }
+    if (!adminApiKey) {
+      throw new Error('ADMIN_API_KEY is required in production.');
     }
   }
 
@@ -54,6 +59,9 @@ export default () => {
     oauth: {
       googleClientId: process.env.GOOGLE_CLIENT_ID ?? '',
       appleClientId: process.env.APPLE_CLIENT_ID ?? '',
+    },
+    admin: {
+      apiKey: adminApiKey,
     },
   };
 };

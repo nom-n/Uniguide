@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:uniguide/core/auth/auth_service.dart';
 import 'package:uniguide/core/constants/app_constants.dart';
 import 'package:uniguide/core/notifications/push_notification_service.dart';
 import 'package:uniguide/l10n/app_localizations.dart';
@@ -10,6 +11,7 @@ import 'package:uniguide/features/welcome/welcome_animation_page.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await AuthService.instance.ensureGoogleSignInReady();
 
   runApp(const UniGuideApp());
 
@@ -117,10 +119,9 @@ class _UniGuideAppState extends State<UniGuideApp> {
       ),
       builder: (context, child) {
         final mq = MediaQuery.of(context);
+        final textScaleFactor = mq.textScaler.scale(1.0).clamp(0.85, 1.35);
         return MediaQuery(
-          data: mq.copyWith(
-            textScaleFactor: mq.textScaleFactor.clamp(0.85, 1.35) as double,
-          ),
+          data: mq.copyWith(textScaler: TextScaler.linear(textScaleFactor)),
           child: child ?? const SizedBox.shrink(),
         );
       },

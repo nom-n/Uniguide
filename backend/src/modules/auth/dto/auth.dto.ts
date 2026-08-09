@@ -46,7 +46,7 @@ export class RegisterDto {
   @Type(() => Number)
   @IsInt()
   @Min(1920)
-  @Max(2026)
+  @Max(new Date().getFullYear())
   birthYear!: number;
 
   @ApiProperty()
@@ -140,7 +140,42 @@ export class SocialLoginDto {
   @Type(() => Number)
   @IsInt()
   @Min(1920)
-  @Max(2026)
+  @Max(new Date().getFullYear())
+  birthYear?: number;
+}
+
+export class UpdateProfileDto {
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  displayName?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  firstName?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  lastName?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  profileEmoji?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  gender?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1920)
+  @Max(new Date().getFullYear())
   birthYear?: number;
 }
 

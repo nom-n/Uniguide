@@ -1,26 +1,44 @@
 {
   "project_info": {
-    "project_number": "494255805135",
-    "project_id": "uniguide-fe9a7",
-    "storage_bucket": "uniguide-fe9a7.firebasestorage.app"
+    "project_number": "845843405260",
+    "project_id": "uniguide-c3fe4",
+    "storage_bucket": "uniguide-c3fe4.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:494255805135:android:104c6339d556ed33395dba",
+        "mobilesdk_app_id": "1:845843405260:android:ce54ffe9d9ea4153102569",
         "android_client_info": {
           "package_name": "com.uniguide.app"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "845843405260-7r17na4khjjshltg8jm36lb2gaac3alo.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.uniguide.app",
+            "certificate_hash": "95460aefe1e731fe9e062d3614001fadbb669759"
+          }
+        },
+        {
+          "client_id": "845843405260-fgkvq2rgti6nd2u0hautqub58hcn39kg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
-          "current_key": "AIzaSyDbQ-Gfn_50NYomMMjoA1KNBsnAOiHCjio"
+          "current_key": "AIzaSyDv__NblCXQtfQRxz2W8Dm_y2-otlOzdrE"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "845843405260-fgkvq2rgti6nd2u0hautqub58hcn39kg.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

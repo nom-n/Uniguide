@@ -93,3 +93,6 @@ yarn-error.log*
 # =========================
 .env
 .env.*
+
+# Local JDK
+android/jdk17/

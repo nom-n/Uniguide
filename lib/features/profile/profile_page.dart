@@ -3,6 +3,7 @@ import 'package:uniguide/l10n/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uniguide/core/auth/auth_service.dart';
 import 'package:uniguide/core/constants/app_constants.dart';
+import 'package:uniguide/core/localization/ui_texts.dart';
 import 'package:uniguide/main.dart';
 import 'package:uniguide/features/settings/settings_page.dart';
 
@@ -126,6 +127,203 @@ class _ProfilePageState extends State<ProfilePage>
       _selectedThemeMode = mode;
     });
     UniGuideApp.setThemeMode(context, mode);
+  }
+
+  Future<void> _editProfile(AuthService auth, AuthUser user) async {
+    final firstNameController = TextEditingController(
+      text: user.firstName ?? '',
+    );
+    final lastNameController = TextEditingController(text: user.lastName ?? '');
+    final displayNameController = TextEditingController(
+      text: user.displayName ?? '',
+    );
+    final emojiController = TextEditingController(
+      text: user.profileEmoji ?? _selectedEmoji,
+    );
+    var selectedGender = user.gender ?? _gender;
+    var selectedBirthYear = user.birthYear ?? _birthYear;
+    var saving = false;
+    String? localError;
+
+    final updated = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      showDragHandle: true,
+      builder: (_) {
+        return StatefulBuilder(
+          builder: (context, setSheetState) {
+            Future<void> save() async {
+              setSheetState(() {
+                saving = true;
+                localError = null;
+              });
+              try {
+                await auth.updateProfile(
+                  displayName: displayNameController.text.trim(),
+                  firstName: firstNameController.text.trim(),
+                  lastName: lastNameController.text.trim(),
+                  profileEmoji: emojiController.text.trim(),
+                  gender: selectedGender,
+                  birthYear: selectedBirthYear,
+                );
+                if (context.mounted) {
+                  final navigator = Navigator.of(context);
+                  if (navigator.canPop()) {
+                    navigator.pop(true);
+                  }
+                }
+              } catch (e) {
+                setSheetState(() => localError = e.toString());
+              } finally {
+                if (context.mounted) {
+                  setSheetState(() => saving = false);
+                }
+              }
+            }
+
+            return Padding(
+              padding: EdgeInsets.only(
+                left: 16,
+                right: 16,
+                top: 8,
+                bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      _text(
+                        context,
+                        en: 'Edit profile',
+                        ar: 'تعديل الملف الشخصي',
+                      ),
+                      style: Theme.of(context).textTheme.headlineSmall
+                          ?.copyWith(fontWeight: FontWeight.w800),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      _text(
+                        context,
+                        en: 'Update the details shown in your account.',
+                        ar: 'حدّث البيانات الظاهرة في حسابك.',
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: displayNameController,
+                      decoration: InputDecoration(
+                        labelText: _text(
+                          context,
+                          en: 'Display name',
+                          ar: 'الاسم الظاهر',
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: firstNameController,
+                            decoration: InputDecoration(
+                              labelText: AppLocalizations.of(
+                                context,
+                              )!.firstNameLabel,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: TextField(
+                            controller: lastNameController,
+                            decoration: InputDecoration(
+                              labelText: AppLocalizations.of(
+                                context,
+                              )!.lastNameLabel,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: emojiController,
+                      decoration: InputDecoration(
+                        labelText: _text(
+                          context,
+                          en: 'Profile emoji',
+                          ar: 'الرمز التعبيري',
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    _ChoiceGroup(
+                      label: AppLocalizations.of(context)!.genderLabel,
+                      selected: selectedGender,
+                      values: {
+                        'male': AppLocalizations.of(context)!.genderMale,
+                        'female': AppLocalizations.of(context)!.genderFemale,
+                        'other': AppLocalizations.of(context)!.genderOther,
+                      },
+                      onChanged: (value) {
+                        setSheetState(() => selectedGender = value);
+                      },
+                    ),
+                    const SizedBox(height: 14),
+                    _BirthYearPicker(
+                      value: selectedBirthYear,
+                      onChanged: (value) {
+                        setSheetState(() => selectedBirthYear = value);
+                      },
+                    ),
+                    if (localError != null) ...[
+                      const SizedBox(height: 12),
+                      Text(
+                        localError!,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.error,
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 18),
+                    FilledButton.icon(
+                      onPressed: saving ? null : save,
+                      icon: saving
+                          ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.save_outlined),
+                      label: Text(
+                        _text(context, en: 'Save changes', ar: 'حفظ التعديلات'),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+
+    firstNameController.dispose();
+    lastNameController.dispose();
+    displayNameController.dispose();
+    emojiController.dispose();
+
+    if (updated == true && mounted) {
+      setState(() {
+        _message = _text(
+          context,
+          en: 'Profile updated successfully.',
+          ar: 'تم تحديث الملف الشخصي بنجاح.',
+        );
+      });
+    }
   }
 
   @override
@@ -315,7 +513,12 @@ class _ProfilePageState extends State<ProfilePage>
                   );
                   setState(() => _registerStep = _RegisterStep.code);
                   if (devCode != null) {
-                    setState(() => _message = 'Development OTP: $devCode');
+                    setState(
+                      () => _message = UiTexts.developmentOtpMessage(
+                        context,
+                        devCode,
+                      ),
+                    );
                   }
                 }),
           icon: const Icon(Icons.mark_email_read_outlined),
@@ -363,7 +566,12 @@ class _ProfilePageState extends State<ProfilePage>
                         _emailController.text,
                       );
                       if (devCode != null) {
-                        setState(() => _message = 'Development OTP: $devCode');
+                        setState(
+                          () => _message = UiTexts.developmentOtpMessage(
+                            context,
+                            devCode,
+                          ),
+                        );
                       }
                     }),
               child: Text(AppLocalizations.of(context)!.resend),
@@ -416,7 +624,7 @@ class _ProfilePageState extends State<ProfilePage>
             Expanded(
               child: _AppTextField(
                 controller: _firstNameController,
-                label: 'First name',
+                label: AppLocalizations.of(context)!.firstNameLabel,
                 icon: Icons.badge_outlined,
               ),
             ),
@@ -530,6 +738,14 @@ class _ProfilePageState extends State<ProfilePage>
           ],
         ),
         const SizedBox(height: 8),
+        FilledButton.tonalIcon(
+          onPressed: _loading ? null : () => _editProfile(auth, user),
+          icon: const Icon(Icons.edit_outlined),
+          label: Text(
+            _text(context, en: 'Edit profile', ar: 'تعديل الملف الشخصي'),
+          ),
+        ),
+        const SizedBox(height: 14),
         Card(
           child: ListTile(
             leading: const Icon(Icons.settings),
@@ -689,6 +905,10 @@ class _ProfilePageState extends State<ProfilePage>
       },
     );
   }
+}
+
+String _text(BuildContext context, {required String en, required String ar}) {
+  return UiTexts.text(context, en: en, ar: ar);
 }
 
 class _AnimatedPanel extends StatelessWidget {

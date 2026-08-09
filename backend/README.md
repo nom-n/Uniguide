@@ -8,6 +8,7 @@ Manual authentication backend with:
 - Google and Apple identity-token sign in
 - Login rate limiting plus temporary account lock after repeated failures
 - Device token storage for FCM (`/devices/fcm-token`)
+- Dynamic content snapshot API and admin CRUD for guides, tasks, places, and notification campaigns
 - Swagger docs at `/docs`
 
 ## 1) Setup
@@ -22,6 +23,15 @@ Manual authentication backend with:
    - `npm run migration:run`
 6. Start server:
    - `npm run start:dev`
+
+Required env variables in production:
+- `DATABASE_URL`
+- `JWT_ACCESS_SECRET`
+- `JWT_REFRESH_SECRET`
+- `SMTP_HOST`
+- `SMTP_USER`
+- `SMTP_PASS`
+- `ADMIN_API_KEY`
 
 ## 2) Endpoints
 
@@ -38,13 +48,35 @@ Manual authentication backend with:
 - `POST /auth/google`
 - `POST /auth/apple`
 - `GET /me`
+- `PATCH /me`
 - `POST /devices/fcm-token`
+- `GET /content/snapshot`
+- `GET /admin/guides`
+- `POST /admin/guides`
+- `PATCH /admin/guides/:id`
+- `DELETE /admin/guides/:id`
+- `GET /admin/tasks`
+- `POST /admin/tasks`
+- `PATCH /admin/tasks/:id`
+- `DELETE /admin/tasks/:id`
+- `GET /admin/places`
+- `POST /admin/places`
+- `PATCH /admin/places/:id`
+- `DELETE /admin/places/:id`
+- `GET /admin/notifications`
+- `POST /admin/notifications`
+- `PATCH /admin/notifications/:id`
+- `POST /admin/notifications/:id/send`
+- `DELETE /admin/notifications/:id`
 
 Email verification uses a 6-digit OTP sent through SMTP. In `development`, if
 SMTP is not configured, the OTP is logged in the backend console and also
 returned as `devEmailVerificationCode`. Password reset still returns
 `devResetToken` only outside production so you can test without an email
 provider. In `production`, configure SMTP and the API does not return dev codes.
+
+Admin routes require the `x-admin-key` header. In development, the default key
+is `dev-admin-key` unless `ADMIN_API_KEY` is set.
 
 Manual registration flow:
 1. `POST /auth/email-otp/send` with `email`.
@@ -69,7 +101,10 @@ The Flutter app uses:
 - `POST /auth/google`
 - `POST /auth/apple`
 - `GET /me`
+- `PATCH /me`
 - `POST /devices/fcm-token`
+- `GET /content/snapshot`
+- `x-admin-key` for the admin console
 
 Run Flutter with:
 - `flutter run --dart-define=API_BASE_URL=http://10.0.2.2:3000 --dart-define=GOOGLE_WEB_CLIENT_ID=your-google-web-client-id.apps.googleusercontent.com`

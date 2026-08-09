@@ -1,5 +1,7 @@
-import 'package:uniguide/core/constants/app_constants.dart';
 import 'package:flutter/material.dart';
+import 'package:uniguide/core/constants/app_constants.dart';
+import 'package:uniguide/l10n/app_localizations.dart';
+
 import 'language_selection_page.dart';
 
 class WelcomeAnimationPage extends StatefulWidget {
@@ -11,9 +13,9 @@ class WelcomeAnimationPage extends StatefulWidget {
 
 class _WelcomeAnimationPageState extends State<WelcomeAnimationPage>
     with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<Offset> _slideAnimation;
-  late Animation<double> _fadeAnimation;
+  late final AnimationController _controller;
+  late final Animation<Offset> _slideAnimation;
+  late final Animation<double> _fadeAnimation;
   bool _showNextButton = false;
 
   @override
@@ -30,10 +32,9 @@ class _WelcomeAnimationPageState extends State<WelcomeAnimationPage>
       end: Offset.zero,
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
 
-    _fadeAnimation = Tween<double>(
-      begin: 0,
-      end: 1,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeIn));
+    _fadeAnimation = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeIn),
+    );
 
     _controller.forward();
 
@@ -52,6 +53,7 @@ class _WelcomeAnimationPageState extends State<WelcomeAnimationPage>
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     return Scaffold(
       body: Container(
         width: double.infinity,
@@ -89,7 +91,8 @@ class _WelcomeAnimationPageState extends State<WelcomeAnimationPage>
                           child: FadeTransition(
                             opacity: _fadeAnimation,
                             child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 16),
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
@@ -103,7 +106,7 @@ class _WelcomeAnimationPageState extends State<WelcomeAnimationPage>
                                   FittedBox(
                                     fit: BoxFit.scaleDown,
                                     child: Text(
-                                      'Welcome to UniGuide',
+                                      loc.welcome,
                                       textAlign: TextAlign.center,
                                       maxLines: 2,
                                       style: TextStyle(
@@ -122,7 +125,6 @@ class _WelcomeAnimationPageState extends State<WelcomeAnimationPage>
                       ),
                     ),
                   ),
-
                   if (_showNextButton)
                     Padding(
                       padding: EdgeInsets.fromLTRB(
@@ -132,16 +134,15 @@ class _WelcomeAnimationPageState extends State<WelcomeAnimationPage>
                         constraints.maxHeight < 520 ? 16 : 40,
                       ),
                       child: SlideTransition(
-                        position:
-                            Tween<Offset>(
-                              begin: const Offset(0, 1),
-                              end: Offset.zero,
-                            ).animate(
-                              CurvedAnimation(
-                                parent: _controller,
-                                curve: Curves.easeOut,
-                              ),
-                            ),
+                        position: Tween<Offset>(
+                          begin: const Offset(0, 1),
+                          end: Offset.zero,
+                        ).animate(
+                          CurvedAnimation(
+                            parent: _controller,
+                            curve: Curves.easeOut,
+                          ),
+                        ),
                         child: Container(
                           width: double.infinity,
                           height: 56,
@@ -172,32 +173,30 @@ class _WelcomeAnimationPageState extends State<WelcomeAnimationPage>
                                 Navigator.pushReplacement(
                                   context,
                                   PageRouteBuilder(
-                                    pageBuilder:
-                                        (context, animation, secondaryAnimation) =>
-                                            const LanguageSelectionPage(),
-                                    transitionsBuilder:
-                                        (
-                                          context,
-                                          animation,
-                                          secondaryAnimation,
-                                          child,
-                                        ) {
-                                          return FadeTransition(
-                                            opacity: animation,
-                                            child: child,
-                                          );
-                                        },
-                                    transitionDuration: const Duration(
-                                      milliseconds: 800,
-                                    ),
+                                    pageBuilder: (context, animation,
+                                            secondaryAnimation) =>
+                                        const LanguageSelectionPage(),
+                                    transitionsBuilder: (
+                                      context,
+                                      animation,
+                                      secondaryAnimation,
+                                      child,
+                                    ) {
+                                      return FadeTransition(
+                                        opacity: animation,
+                                        child: child,
+                                      );
+                                    },
+                                    transitionDuration:
+                                        const Duration(milliseconds: 800),
                                   ),
                                 );
                               },
                               borderRadius: BorderRadius.circular(16),
-                              child: const Center(
+                              child: Center(
                                 child: Text(
-                                  'Next',
-                                  style: TextStyle(
+                                  loc.next,
+                                  style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 18,
                                     fontWeight: FontWeight.w600,

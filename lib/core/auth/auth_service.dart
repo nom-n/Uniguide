@@ -16,6 +16,7 @@ const String _kApiBaseUrl = String.fromEnvironment(
 );
 const String _kGoogleServerClientId = String.fromEnvironment(
   'GOOGLE_WEB_CLIENT_ID',
+  defaultValue: '845843405260-fgkvq2rgti6nd2u0hautqub58hcn39kg.apps.googleusercontent.com',
 );
 const String _kAppleServiceId = String.fromEnvironment('APPLE_SERVICE_ID');
 const String _kAppleRedirectUri = String.fromEnvironment('APPLE_REDIRECT_URI');
@@ -33,13 +34,32 @@ class AuthService {
   bool _googleSignInConfigured = false;
   AuthSession? _session;
 
+  Future<void> ensureGoogleSignInReady() async {
+    await _ensureGoogleSignInConfigured();
+  }
+
   Future<bool> initialize() async {
     if (_initialized) return _session != null;
     _initialized = true;
+    await _ensureGoogleSignInConfigured();
     final persisted = await _loadSessionFromStorage();
     _session = persisted;
     _authController.add(_session?.user);
     return _session != null;
+  }
+
+  Future<void> _ensureGoogleSignInConfigured() async {
+    if (_googleSignInConfigured) return;
+    if (_kGoogleServerClientId.isEmpty) {
+      throw const AuthException(
+        'Google sign-in is not configured. Run the app with '
+        '--dart-define=GOOGLE_WEB_CLIENT_ID=<your-web-client-id>.apps.googleusercontent.com',
+      );
+    }
+    await GoogleSignIn.instance.initialize(
+      serverClientId: _kGoogleServerClientId,
+    );
+    _googleSignInConfigured = true;
   }
 
   Stream<AuthUser?> get authStateChanges => _authController.stream;
@@ -141,15 +161,8 @@ class AuthService {
 
   Future<AuthSession> signInWithGoogle() async {
     try {
+      await _ensureGoogleSignInConfigured();
       final googleSignIn = GoogleSignIn.instance;
-      if (!_googleSignInConfigured) {
-        await googleSignIn.initialize(
-          serverClientId: _kGoogleServerClientId.isEmpty
-              ? null
-              : _kGoogleServerClientId,
-        );
-        _googleSignInConfigured = true;
-      }
       final googleUser = await googleSignIn.authenticate();
       final googleAuth = googleUser.authentication;
       final idToken = googleAuth.idToken;
@@ -166,10 +179,16 @@ class AuthService {
       rethrow;
     } catch (e) {
       final text = e.toString();
+      if (text.contains('clientConfigurationError') ||
+          text.contains('serverClientId must be provided')) {
+        throw const AuthException(
+          'Google sign-in is not configured correctly. Add SHA-1/SHA-256 in Firebase, download google-services.json again, and pass GOOGLE_WEB_CLIENT_ID.',
+        );
+      }
       if (text.contains('ApiException: 10') ||
           text.contains('sign_in_failed')) {
         throw const AuthException(
-          'Google sign-in is not configured correctly. Add SHA-1/SHA-256 in Firebase, download google-services.json again, and pass GOOGLE_WEB_CLIENT_ID.',
+          'Google sign-in failed. Verify SHA-1/SHA-256 fingerprints in Firebase and use a fresh google-services.json.',
         );
       }
       throw AuthException(text);
@@ -248,10 +267,48 @@ class AuthService {
     if (userData == null) {
       throw const AuthException('Invalid /me response from server.');
     }
-    final current = _session;
-    if (current == null) return userData;
-    final updatedSession = current.copyWith(user: AuthUser.fromJson(userData));
-    await _saveSession(updatedSession);
+    final updatedSession = _session?.copyWith(
+      user: AuthUser.fromJson(userData),
+    );
+    if (updatedSession != null) {
+      await _saveSession(updatedSession);
+    }
+    return userData;
+  }
+
+  Future<Map<String, dynamic>> updateProfile({
+    String? displayName,
+    String? firstName,
+    String? lastName,
+    String? profileEmoji,
+    String? gender,
+    int? birthYear,
+  }) async {
+    final payloadEntries = <MapEntry<String, dynamic>>[
+      if (displayName != null) MapEntry('displayName', displayName),
+      if (firstName != null) MapEntry('firstName', firstName),
+      if (lastName != null) MapEntry('lastName', lastName),
+      if (profileEmoji != null) MapEntry('profileEmoji', profileEmoji),
+      if (gender != null) MapEntry('gender', gender),
+      if (birthYear != null) MapEntry('birthYear', birthYear),
+    ];
+    final payload = Map.fromEntries(payloadEntries);
+    final response = await _sendJsonRequest(
+      method: 'PATCH',
+      path: '/me',
+      body: payload,
+      includeAccessToken: true,
+    );
+    final userData = _extractUserMap(response);
+    if (userData == null) {
+      throw const AuthException('Invalid profile response from server.');
+    }
+    final updatedSession = _session?.copyWith(
+      user: AuthUser.fromJson(userData),
+    );
+    if (updatedSession != null) {
+      await _saveSession(updatedSession);
+    }
     return userData;
   }
 
@@ -304,6 +361,14 @@ class AuthService {
       if (method == 'GET') {
         response = await _httpClient
             .get(uri, headers: headers)
+            .timeout(_kRequestTimeout);
+      } else if (method == 'PATCH') {
+        response = await _httpClient
+            .patch(
+              uri,
+              headers: headers,
+              body: jsonEncode(body ?? <String, dynamic>{}),
+            )
             .timeout(_kRequestTimeout);
       } else {
         response = await _httpClient
