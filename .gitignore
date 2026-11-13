@@ -96,3 +96,6 @@ yarn-error.log*
 
 # Local JDK
 android/jdk17/
+
+# Private design assets
+private/
